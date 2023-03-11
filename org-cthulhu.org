@@ -1,0 +1,785 @@
+
+#+begin_src emacs-lisp :tangle org-cthulhu.el
+(require 'cl-lib)
+(require 'dash)
+(require 'org-ml)
+#+end_src
+
+#+RESULTS:
+: org-ml
+
+* Import des personnages 
+
+#+begin_src emacs-lisp
+(defun get-tagged-subtree (taglist)
+  "Détermine la liste les enfants des nœuds dont la liste des tags est taglist "
+  (apply #'-concat (-map #'org-ml-get-children 
+  (org-ml-match '((:tags taglist)) (org-ml-parse-this-buffer)))))
+#+end_src
+
+#+RESULTS:
+: get-tagged-subtree
+
+#+begin_src emacs-lisp :tangle org-cthulhu.el
+(defun get-characters-name ()
+  (--map (org-ml-get-property :raw-value it) (get-tagged-subtree '("personnage"))))
+
+(defun get-name (personnage)
+  (org-ml-get-property :raw-value personnage))
+#+end_src
+
+#+RESULTS:
+: get-name
+
+#+begin_src emacs-lisp
+(get-characters-name)
+(get-name (select-character))
+#+end_src
+
+#+RESULTS:
+: La goule
+
+* Manipulation d'un personnage
+** Récupérer la section de ses tables 
+
+#+begin_src emacs-lisp :tangle org-cthulhu.el 
+(defun select-character ()
+  "Renvoie _un_ personnage du buffer courant"
+  (let* ((personnages-liste (get-tagged-subtree '("personnage")))
+         (personnage-selectionné (completing-read "Sélectionner un personnage: " (get-characters-name) nil t)))
+    (car (--filter (string= (org-ml-get-property :raw-value it) personnage-selectionné) personnages-liste))))
+
+;; On peut probablement utiliser org-ml-match...
+(defun get-tables (personnage)
+  "Récupère la section des tables d'un personnage donné"
+  (car (--filter (string= (org-ml-get-property :raw-value it) "Tables") (org-ml-get-children personnage))))
+
+(get-tables (select-character))
+#+end_src
+
+#+RESULTS:
+| headline | (:raw-value Tables :begin 9481 :end 12621 :pre-blank 0 :contents-begin 9492 :contents-end 12621 :level 3 :priority nil :tags nil :todo-keyword nil :todo-type nil :post-blank 0 :footnote-section-p nil :archivedp nil :commentedp nil :post-affiliated 9481 :title (Tables) :parent (headline (:raw-value Bobby Watson : un fameux concierge :begin 8985 :end 12622 :pre-blank 0 :contents-begin 9050 :contents-end 12621 :level 2 :priority nil :tags nil :todo-keyword nil :todo-type nil :post-blank 1 :footnote-section-p nil :archivedp nil :commentedp nil :post-affiliated 8985 :title (Bobby Watson : un fameux concierge) :parent (headline (:raw-value Personnages tests :begin 8907 :end 15779 :pre-blank 0 :contents-begin 8985 :contents-end 15778 :level 1 :priority nil :tags (personnage) :todo-keyword nil :todo-type nil :post-blank 1 :footnote-section-p nil :archivedp nil :commentedp nil :post-affiliated 8907 :title (Personnages tests) :parent (org-data nil (section (:begin 3 :end 133 :contents-begin 3 :contents-end 132 :post-blank 1 :post-affiliated 3 :parent #5) (src-block (:language emacs-lisp :switches nil :parameters :tangle org-cthulhu.el :begin 3 :end 112 :number-lines nil :preserve-indent nil :retain-labels t :use-labels t :label-fmt nil :value (require 'cl-lib) |
+
+# #+begin_src emacs-lisp
+# ;; Récupérer les tables du personnage sélectionné dans la liste. Oh tiens : =)
+# (org-ml-get-property :begin (car (get-tables (select-character personnages-subtrees))))
+# (org-ml-get-property :end (car (get-tables (select-character personnages-subtrees))))
+# #+end_src
+
+# #+RESULTS:
+# : 14299
+
+** Récupérer ses caractéristiques à partir d'une table 
+*** Utilitaires sur les tables 
+
+#+begin_src emacs-lisp :tangle org-cthulhu.el 
+(defun get-table-column (table n)
+  (let ((rows-num (length (org-ml-get-children table))))
+    (loop for i from 0 to (- rows-num 1)
+          collect (org-ml-get-children (org-ml-table-get-cell i n table)))))
+
+(defun get-caracteristics-from (table)
+  "Les caractéristiques sont les valeurs en première colonne de la table"
+  (-map #'car (get-table-column table 0)))
+  ;; (-map #'org-ml-get-children (get-table-column table 0)))
+
+(defun get-caracteristics-values-from (table)
+  "Les valeurs sont les valeurs en seconde colonne de la table"
+  (-map #'car (get-table-column table 1)))
+  ;; (-map #'org-ml-get-children (get-table-column table 1)))
+
+#+end_src
+
+#+RESULTS:
+: get-caracteristics-values-from
+
+*** Liste des caractéristiques d'un personnage 
+
+#+begin_src emacs-lisp :tangle org-cthulhu.el 
+(defun get-character-caracteristics-names (personnage)
+  (let* ((carac-tables (org-ml-match '(:any * table) personnage))
+         (carac (-map #'get-caracteristics-from carac-tables)))
+    (apply #'-concat carac)))
+
+(defun get-character-caracteristics-values (personnage)
+  (let* ((carac-tables (org-ml-match '(:any * table) personnage))
+         (carac (-map #'get-caracteristics-values-from carac-tables)))
+    (apply #'-concat carac)))
+
+(defun get-character-info (personnage)
+  (let* ((carac-name (get-character-caracteristics-names personnage))
+	(carac-value (get-character-caracteristics-values personnage)))
+   (-zip-with 'cons carac-name carac-value)))
+#+end_src
+
+#+RESULTS:
+: get-character-info
+
+#+begin_src emacs-lisp :tangle org-cthulhu.el
+(defun get-carac-value (personnage carac)
+  (let ((personnage-info  (get-character-info personnage)))
+    (string-to-number (cdr (assoc carac personnage-info)))))
+
+(defun select-get-carac (personnage)
+  (get-carac-value personnage
+                   (completing-read "Sélectionner une  caractéristique: " (get-character-info personnage) nil t)))
+
+;; (select-get-carac (select-character personnages-subtrees))
+;; (get-carac-value (select-character personnages-subtrees) "POU")
+#+end_src
+
+#+RESULTS:
+: select-get-carac
+
+** Modifier une caractéristique 
+
+#+begin_src emacs-lisp
+(defun set-carac (personnage carac calc-new-carac)
+  (let* ((tables (get-tables personnage))
+         (beg (org-ml-get-property :begin tables))
+         (end (org-ml-get-property :end tables))
+         (val (get-carac-value personnage carac))
+         (v (apply calc-new-carac (list val)))
+         (m (majeur v))
+         (e (extreme v))
+         (new-line (s-lex-format "| ${carac} | ${v} | ${m} | ${e} |")))
+    (save-excursion
+      (goto-char beg)
+      (re-search-forward (s-lex-format "^.*${carac}.*$"))
+      (replace-match new-line)
+      (org-table-align))))
+;; (replace-regexp-in-region (s-lex-format "^.*${carac}.*$") new-line beg end)))
+
+(defun augmente-carac (old-carac)
+  (+ old-carac 20))
+
+(defun cthulhu-select-set-carac ()
+  (interactive)
+  (let* ((personnage (select-character))
+         (carac (completing-read "Sélectionner une  caractéristique: " (get-character-info personnage) nil t))
+         (new-value (string-to-number (read-from-minibuffer "Valeur de la caractéristique ? ")))
+         (calc-new-carac (lambda (old-carac) new-value)))
+    (set-carac personnage carac calc-new-carac)))
+#+end_src
+
+#+RESULTS:
+: cthulhu-select-set-carac
+
+* Système de jeu
+
+** Caractéristiques
+
+#+begin_src emacs-lisp
+(defun majeur (carac)
+  (round (/ carac 2)))
+(defun extreme (carac)
+  (round (/ carac 5)))
+#+end_src
+
+#+RESULTS:
+: extreme
+
+** Caractéristiques dérivées
+
+Page 35 manuel du gardien.
+
+#+begin_src emacs-lisp
+(defun impact (fortai)
+  (cond
+   ((< fortai 64) "-2")
+   ((< fortai 84) "-1")
+   ((< fortai 124) "0")
+   ((< fortai 164) "1D4")
+   ((< fortai 204) "1D6")
+   ((< fortai 284) "2D6")
+   ((< fortai 364) "3D6")
+   ((< fortai 444) "4D6")
+   ((< fortai 524) "5D6")
+   (t "6D6")))
+
+(defun carrure (fortai)
+  (cond
+   ((< fortai 64) "-2")
+   ((< fortai 84) "-1")
+   ((< fortai 124) "0")
+   ((< fortai 164) "1")
+   ((< fortai 204) "2")
+   ((< fortai 284) "3")
+   ((< fortai 364) "4")
+   ((< fortai 444) "5")
+   ((< fortai 524) "6")
+   (t "100")))
+#+end_src
+
+#+RESULTS:
+: carrure
+
+** Tests de caractéristique
+
+#+begin_src emacs-lisp :tangle org-cthulhu.el
+(defun roll100 (&optional modif)
+  "Lance un dé 100 avec des dés bonus/malus "
+  (if (not modif)
+      (random 100)
+  (let* ((choose-dice-fun (if (< 0 modif) #'min #'max))
+         (dizaines-chiffre (apply choose-dice-fun
+                                  (loop for i below (1+ (abs modif))
+                                        collect (random 10))))
+         (unités-chiffre (random 10)))
+    (+ unités-chiffre (* dizaines-chiffre 10))))))
+    ;; (format "%d%d" dizaines-chiffre unités-chiffre)))
+
+(defun roll (Ds F &optional modif)
+  "Renvoie une liste de lancés de dés. "
+  (if (= F 100)
+      (loop for i below Ds
+	    collect (roll100 modif))
+    (loop for i below Ds
+	  collect (1+ (random F)))))
+#+end_src
+
+#+RESULTS:
+: roll100
+
+#+begin_src emacs-lisp
+(defun roll-caracter-characteristic ()
+  (let* ((personnage (select-character))
+         (carac (select-get-carac personnage))
+         (r (roll100 0))
+         (mess (format "%d [%d, %d, %d] : " r carac (majeur carac) (extreme carac))))
+    (cond
+     ((<= r (extreme carac)) (concat mess "réussite extrême"))
+     ((<= r (majeur carac)) (concat mess "réussite majeure"))
+     ((<= r carac) (concat mess "réussite régulière"))
+     (t (concat mess "échec"))
+     (t (concat mess "échec critique")))
+    ))
+
+(roll-caracter-characteristic)
+#+end_src
+
+#+RESULTS:
+: 41 [50, 25, 10] : réussite régulière
+
+** Tests opposés
+
+#+begin_src emacs-lisp
+(defvar success-types
+  '(("Maladresse" . 5)
+    ("Échec" . 4)
+    ("Réussite normale" . 3)
+    ("Réussite majeure" . 2)
+    ("Réussite extrême" . 1)
+    ("Réussite critique" . 0)))
+
+(defun ask-success-type ()
+  (cdr (assoc (completing-read "Type de réussite" success-types) success-types)))
+
+(defun get-success (out)
+  (car (rassq out success-types)))
+
+(defun roll-success (roll comp)
+  (cond
+   ((= roll 100) 5)
+   ((and (< comp 50) (> roll 95)) 5)
+   ((> roll comp) 4)
+   ((<= roll 1) 0)
+   ((<= roll (extreme comp)) 1)
+   ((<= roll (majeur comp)) 2)
+   ((<= roll comp) 3)))
+#+end_src
+
+#+RESULTS:
+: roll-success
+
+
+#+begin_src emacs-lisp
+(defun cthulhu-test-opposé (&optional success1)
+  (interactive "P")
+  (let* ((perso1 (select-character))
+         (out1 (if success1
+                   (ask-success-type)
+                 (roll-success (roll100) (select-get-carac perso1))))
+         (perso2 (select-character))
+         (comp2 (select-get-carac perso2))
+         (out2 (roll-success (roll100) comp2)))
+    (message 
+    (cond
+     ((< out1 out2) (format "Succès de %s (%s vs %s)"
+                                     (get-name perso1) (get-success out1) (get-success out2)))
+     ((< out2 out1) (format "Succès de %s (%s vs %s)"
+                                     (get-name perso2) (get-success out2) (get-success out1)))
+     (t "Pas de succès"))))))
+#+end_src
+
+#+RESULTS:
+: cthulhu-test-opposé
+
+
+#+begin_src emacs-lisp
+(cthulhu-test-opposé)
+#+end_src
+
+#+RESULTS:
+: Succès de Bobby Watson : un fameux concierge (Réussite extrême vs Échec)
+
+* Gestion des personnages
+** Initialiser les caractéristiques dérivées
+
+#+begin_src emacs-lisp
+(defun calcule-dérivées (personnage)
+  (let ((imp (impact (+ (get-carac-value personnage "FOR") (get-carac-value personnage "TAI"))))
+        (carr (carrure (+ (get-carac-value personnage "FOR") (get-carac-value personnage "TAI"))))
+        (esq (/ (get-carac-value personnage "DEX") 2))
+        (san (get-carac-value personnage "POU"))
+        (langue (get-carac-value personnage "EDU"))
+        (pm (/ (get-carac-value personnage "POU") 5))
+	(langue ())
+        (pdv (/ (+ (get-carac-value personnage "CON") (get-carac-value personnage "TAI")) 10)))
+    `(("Impact" . ,(format "| -- Impact | %s |  |  |" imp))
+      ("Carrure" . ,(format "| -- Carrure | %s |  |  |" carr))
+      ("Esquive" . ,(format "| Esquive | %s | %s | %s |" esq (majeur esq) (extreme esq)))
+      ;; ("Langue maternelle" . ,(format "| Langue maternelle | %s | %s | %s |" langue (majeur langue) (extreme langue)))
+      ("Santé mentale" . ,(format "| Santé mentale | %s | %s | %s |" san (majeur san) (extreme san)))
+      ("Points de magie" . ,(format "| Points de magie | %s |  |  |" pm))
+      ("Points de vie" . ,(format "| Points de vie | %s |  |  |" pdv))
+      )))
+
+(defun init-tables (personnage)
+  (let* ((tables (get-tables personnage))
+         (beg (org-ml-get-property :begin tables))
+         (end (org-ml-get-property :end tables))
+         (pdv (/ (+ (get-carac-value personnage "CON") (get-carac-value personnage "TAI")) 10))
+         (new-line (s-lex-format "| Points de vie | ${pdv} |  |  |")))
+    (save-excursion
+      (cl-loop for (carac-name . new-line) in (calcule-dérivées personnage) do
+               (goto-char beg)
+               (re-search-forward (s-lex-format "^.*${carac-name}.*$"))
+               (replace-match new-line)
+               (org-table-align)))))
+
+(defun cthulhu-select-init ()
+  (interactive)
+  (init-tables (select-character)))
+#+end_src
+
+#+RESULTS:
+: cthulhu-select-init
+
+* Personnages tests                                              :personnage:
+** Bobby Watson : un fameux concierge                           
+*** En bref 
+
+3 lignes rapidement *lisibles *.
+
+*** Histoire
+
+Lore. 
+
+Particularités :
+- description ::
+- traits de caractère :: 
+- idéologies et croyances :: 
+- personnes importantes :: 
+- lieu important :: 
+- possessions importantes :: 
+- phobies et manies :: 
+
+*** Équipement et possessions
+
+- items :: divers
+- Armes de poing :: Derringer calibre 25 (1D6) 
+- Fusils :: Carabine (2D6)  
+- Mitraillettes :: Thompson (1D10 + 2) 
+
+*** Tables
+**** Caractéristiques 
+
+#+TBLNAME: carac
+| FOR | 90 | 25 | 10 |
+| CON | 60 | 30 | 12 |
+| TAI | 70 | 25 | 10 |
+| DEX | 70 | 35 | 14 |
+| INT | 50 | 25 | 10 |
+| APP | 50 | 25 | 10 |
+| POU | 80 | 30 | 12 |
+| EDU | 10 |  5 |  2 |
+| AGE | 35 |    |    |
+#+TBLFM: $3=round($2/2)::$4=round($2/5)
+
+**** Santé physique et psychique
+
+| Santé mentale   | 80 | 40 | 16 |
+| Points de vie   | 13 |    |    |
+| Points de magie | 16 |    |    |
+| Chance          |    |  0 |  0 |
+#+TBLFM: $3=round($2/2)::$4=round($2/5)
+
+**** Caractéristiques de combat
+
+| Corps à corps (1D3)          |  25 | 13 | 5 |
+| -- Carrure                   |   1 |    |   |
+| -- Impact                    | 1D4 |    |   |
+| Armes à feu (armes de poing) |  20 | 10 | 4 |
+| Armes à feu (fusils)         |  25 | 13 | 5 |
+| Armes à feu (mitraillettes)  |  15 |  8 | 3 |
+| -- Esquive                   |  35 | 17 | 7 |
+#+TBLFM: $3=round($2/2)::$4=round($2/5)
+
+**** Compétences
+***** Sociales
+
+| Baratin      |  5 | 3 | 1 |
+| Charme       | 15 | 8 | 3 |
+| Intimidation | 15 | 8 | 3 |
+| Persuasion   | 10 | 5 | 2 |
+| Psychologie  | 10 | 5 | 2 |
+#+TBLFM: $3=round($2/2)::$4=round($2/5)
+
+***** Se repérer
+
+| Bibliothèque        | 20 | 10 | 4 |
+| Orientation         | 10 |  5 | 2 |
+| Pister              | 10 |  5 | 2 |
+| Trouver objet caché | 25 | 13 | 5 |
+#+TBLFM: $3=round($2/2)::$4=round($2/5)
+
+***** Cthulhu
+
+| Occultisme | 5 | 3 | 1 |
+| Mythos     | 0 | 0 | 0 |
+#+TBLFM: $3=round($2/2)::$4=round($2/5)
+
+***** Soins
+
+| Premier soins | 30 | 15 | 6 |
+| Médecine      |  1 |  1 | 0 |
+| Psychanalyse  |  1 |  1 | 0 |
+#+TBLFM: $3=round($2/2)::$4=round($2/5)
+
+***** Se déplacer
+
+| Conduite   | 20 | 10 | 4 |
+| Grimper    | 20 | 10 | 4 |
+| Lancer     | 20 | 10 | 4 |
+| Nager      | 20 | 10 | 4 |
+| Pilotage   |  1 |  1 | 0 |
+| Sauter     | 20 | 10 | 4 |
+| Survie     | 10 |  5 | 2 |
+| Écouter    | 20 | 10 | 4 |
+| Équitation |  5 |  3 | 1 |
+#+TBLFM: $3=round($2/2)::$4=round($2/5)
+
+***** Filouterie
+
+| Discrétion | 20 | 10 | 4 |
+| Imposture  |  5 |  3 | 1 |
+| Crochetage |  1 |  1 | 0 |
+| Pickpocket | 10 |  5 | 2 |
+#+TBLFM: $3=round($2/2)::$4=round($2/5)
+
+***** Connaissances théoriques
+
+| Anthropologie     |   1 |              1 |              0 |
+| Archéologie       |   1 |              1 |              0 |
+| Arts et métiers   |     |              0 |              0 |
+| Droit | 555 | 277 | 111 |
+| Histoire          |   5 |              3 |              1 |
+| Langue maternelle | EDU | round(EDU / 2) | round(EDU / 5) |
+| Langues (autre)   |   1 |              1 |              0 |
+| Naturalisme       |  10 |              5 |              2 |
+| Sciences          |   1 |              1 |              0 |
+#+TBLFM: $3=round($2/2)::$4=round($2/5)
+
+***** Connaissances techniques
+
+| Mécanique   | 10 | 5 | 2 |
+| Électricité | 10 | 5 | 2 |
+#+TBLFM: $3=round($2/2)::$4=round($2/5)
+
+***** Argent 
+
+| Comptabilité | 5 | 3 | 1 |
+| Crédit       | 0 | 0 | 0 |
+| Estimation   | 5 | 3 | 1 |
+#+TBLFM: $3=round($2/2)::$4=round($2/5)
+
+** Ybbo Nostaw : cambrioleur 
+*** En bref 
+
+3 lignes rapidement lisibles.
+
+*** Histoire
+
+Lore. 
+
+Particularités :
+- description ::
+- traits de caractère :: 
+- idéologies et croyances :: 
+- personnes importantes :: 
+- lieu important :: 
+- possessions importantes :: 
+- phobies et manies :: 
+
+*** Équipement et possessions
+
+- items :: divers
+- Armes de poing :: Derringer calibre 25 (1D6) 
+- Fusils :: Carabine (2D6)  
+- Mitraillettes :: Thompson (1D10 + 2) 
+
+*** Tables
+**** Caractéristiques 
+
+| FOR |   |   |   |
+| CON |   |   |   |
+| TAI |   |   |   |
+| DEX |   |   |   |
+| INT |   |   |   |
+| APP |   |   |   |
+| POU |   |   |   |
+| EDU |   |   |   |
+#+TBLFM: $3=round($2/2)::$4=round($2/5)
+
+**** Santé physique et psychique
+
+| Santé mentale  |   |   |   |
+| Points de vie  |   |   |   |
+| Point de magie |   |   |   |
+| Chance         |   |   |   |
+#+TBLFM: $3=round($2/2)::$4=round($2/5)
+
+**** Caractéristiques de combat
+
+| Corps à corps (1D3)          |   |   |   |
+| -- Carrure                   |   |   |   |
+| Armes à feu (armes de poing) |   |   |   |
+| Armes à feu (fusils)         |   |   |   |
+| Armes à feu (mitraillettes)  |   |   |   |
+| Esquive                      |   |   |   |
+#+TBLFM: $3=round($2/2)::$4=round($2/5)
+
+**** Compétences
+***** Sociales
+
+| Baratin      |   |   |   |
+| Charme       |   |   |   |
+| Intimidation |   |   |   |
+| Persuasion   |   |   |   |
+| Psychologie  |   |   |   |
+#+TBLFM: $3=round($2/2)::$4=round($2/5)
+
+***** Se repérer
+
+| Bibliothèque        |   |   |   |
+| Orientation         |   |   |   |
+| Pister              |   |   |   |
+| Trouver objet caché |   |   |   |
+#+TBLFM: $3=round($2/2)::$4=round($2/5)
+
+***** Cthulhu
+
+| Occultisme |   |   |   |
+| Mythos     |   |   |   |
+#+TBLFM: $3=round($2/2)::$4=round($2/5)
+
+***** Soins
+
+| Premier soins |   |   |   |
+| Médecine      |   |   |   |
+| Psychanalyse  |   |   |   |
+#+TBLFM: $3=round($2/2)::$4=round($2/5)
+
+***** Se déplacer
+
+| Écouter    |   |   |   |
+| Conduite   |   |   |   |
+| Équitation |   |   |   |
+| Survie     |   |   |   |
+| Pilotage   |   |   |   |
+| Grimper    |   |   |   |
+| Nager      |   |   |   |
+| Lancer     |   |   |   |
+| Sauter     |   |   |   |
+#+TBLFM: $3=round($2/2)::$4=round($2/5)
+
+***** Filouterie
+
+| Discrétion |   |   |   |
+| Imposture  |   |   |   |
+| Crochetage |   |   |   |
+| Pickpocket |   |   |   |
+#+TBLFM: $3=round($2/2)::$4=round($2/5)
+
+***** Connaissances théoriques
+
+| Anthropologie              |   |   |   |
+| Sciences                   |   |   |   |
+| Archéologie                |   |   |   |
+| Histoire                   |   |   |   |
+| Arts et métiers (cuisiner) |   |   |   |
+| Naturalisme                |   |   |   |
+| Langue maternelle          |   |   |   |
+| Droit                      |   |   |   |
+| Langues (grec)             |   |   |   |
+#+TBLFM: $3=round($2/2)::$4=round($2/5)
+
+***** Connaissances techniques
+
+| Mécanique                  |     |     |     |
+| Électricité                |     |     |     |
+#+TBLFM: $3=round($2/2)::$4=round($2/5)
+
+***** Argent 
+
+| Comptabilité |   |   |   |
+| Crédit       |   |   |   |
+| Estimation   |   |   |   |
+#+TBLFM: $3=round($2/2)::$4=round($2/5)
+
+* Monstres tests                                                 :personnage:
+** La goule
+*** En bref 
+
+3 lignes rapidement lisibles.
+
+*** Histoire
+
+Lore. 
+
+Particularités :
+- description ::
+- traits de caractère :: 
+- idéologies et croyances :: 
+- personnes importantes :: 
+- lieu important :: 
+- possessions importantes :: 
+- phobies et manies :: 
+
+*** Équipement et possessions
+
+- items :: divers
+- Armes de poing :: Derringer calibre 25 (1D6) 
+- Fusils :: Carabine (2D6)  
+- Mitraillettes :: Thompson (1D10 + 2) 
+
+*** Tables
+**** Caractéristiques 
+
+| FOR | 70 | 35 | 14 |
+| CON |    |    |    |
+| TAI |    |    |    |
+| DEX |    |    |    |
+| INT |    |    |    |
+| APP |    |    |    |
+| POU |    |    |    |
+| EDU |    |    |    |
+#+TBLFM: $3=round($2/2)::$4=round($2/5)
+
+**** Santé physique et psychique
+
+| Santé mentale  |   |   |   |
+| Points de vie  |   |   |   |
+| Point de magie |   |   |   |
+| Chance         |   |   |   |
+#+TBLFM: $3=round($2/2)::$4=round($2/5)
+
+**** Caractéristiques de combat
+
+| Corps à corps (1D3)          |   |   |   |
+| -- Carrure                   |   |   |   |
+| Armes à feu (armes de poing) |   |   |   |
+| Armes à feu (fusils)         |   |   |   |
+| Armes à feu (mitraillettes)  |   |   |   |
+| Esquive                      |   |   |   |
+#+TBLFM: $3=round($2/2)::$4=round($2/5)
+
+**** Compétences
+***** Sociales
+
+| Baratin      |   |   |   |
+| Charme       |   |   |   |
+| Intimidation |   |   |   |
+| Persuasion   |   |   |   |
+| Psychologie  |   |   |   |
+#+TBLFM: $3=round($2/2)::$4=round($2/5)
+
+***** Se repérer
+
+| Bibliothèque        |   |   |   |
+| Orientation         |   |   |   |
+| Pister              |   |   |   |
+| Trouver objet caché |   |   |   |
+#+TBLFM: $3=round($2/2)::$4=round($2/5)
+
+***** Cthulhu
+
+| Occultisme |   |   |   |
+| Mythos     |   |   |   |
+#+TBLFM: $3=round($2/2)::$4=round($2/5)
+
+***** Soins
+
+| Premier soins |   |   |   |
+| Médecine      |   |   |   |
+| Psychanalyse  |   |   |   |
+#+TBLFM: $3=round($2/2)::$4=round($2/5)
+
+***** Se déplacer
+
+| Écouter    |   |   |   |
+| Conduite   |   |   |   |
+| Équitation |   |   |   |
+| Survie     |   |   |   |
+| Pilotage   |   |   |   |
+| Grimper    |   |   |   |
+| Nager      |   |   |   |
+| Lancer     |   |   |   |
+| Sauter     |   |   |   |
+#+TBLFM: $3=round($2/2)::$4=round($2/5)
+
+***** Filouterie
+
+| Discrétion |   |   |   |
+| Imposture  |   |   |   |
+| Crochetage |   |   |   |
+| Pickpocket |   |   |   |
+#+TBLFM: $3=round($2/2)::$4=round($2/5)
+
+***** Connaissances théoriques
+
+| Anthropologie              |   |   |   |
+| Sciences                   |   |   |   |
+| Archéologie                |   |   |   |
+| Histoire                   |   |   |   |
+| Arts et métiers (cuisiner) |   |   |   |
+| Naturalisme                |   |   |   |
+| Langue maternelle          |   |   |   |
+| Droit                      |   |   |   |
+| Langues (grec)             |   |   |   |
+#+TBLFM: $3=round($2/2)::$4=round($2/5)
+
+***** Connaissances techniques
+
+| Mécanique                  |     |     |     |
+| Électricité                |     |     |     |
+#+TBLFM: $3=round($2/2)::$4=round($2/5)
+
+***** Argent 
+
+| Comptabilité |   |   |   |
+| Crédit       |   |   |   |
+| Estimation   |   |   |   |
+#+TBLFM: $3=round($2/2)::$4=round($2/5)
+
+
+* Github
+
+#+begin_src emacs-lisp
+;; (ghub-post "/user/repos" '((name . "org-cthulhu")))
+;; (magit-init (file-name-directory buffer-file-name))
+;; (magit-remote-add "origin" (concat "git@github.com:marzikill/" "org-cthulhu" ".git"))))
+#+end_src
+
+#+RESULTS:
