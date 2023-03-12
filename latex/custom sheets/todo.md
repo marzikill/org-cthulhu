@@ -1,5 +1,0 @@
-- [ ] emacs export : les sous-sous-sous items doivent être des paragraphes et non des listes
-- [ ] ajouter des espaces en face des items vides dans les particularités et équipement (2em)
-- [ ] environnement multicols*(2) : [début -> table[ 
-- [ ] multicol(2) : [tables -> fin[
-- [ ] supprimer les numéros de section et revoir le style

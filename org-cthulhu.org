@@ -8,6 +8,37 @@
 #+RESULTS:
 : org-ml
 
+* TODO Pistes d'amélioration
+** Manipulation des personnages
+
+- [ ] ~cthulhu-select-set-carac~ devrait indiquer dans le minibuffer ce qu'il a fait
+
+** Gestion de l'inventaire d'un personnage
+
+- [ ] obtenir la liste des objets
+- [ ] ajouter un objet
+- [ ] retirer un objet
+- [ ] transférer un objet
+
+** Système de jeu 
+
+- [ ] panne pour arme
+- [ ] gestion des caractéristiques modifiables :
+  - système de santé 
+  - santé mentale
+  - chance 
+- [ ] gestion des états d'un personnage (folie, nombre de round, etc)
+- [ ] gestion des combats
+
+** Améliorations diverses
+
+- [ ]Détecter les personnages (tag "personnage") dans un entête de niveau >= 2
+
+** Latex
+
+- [ ] trouver quoi mettre au recto du lifetracker
+  un récapitulatif de certaines règles ?
+
 * Import des personnages 
 
 #+begin_src emacs-lisp
@@ -786,12 +817,3 @@ Particularités :
 #+TBLFM: $3=round($2/2)::$4=round($2/5)
 
 
-* Github
-
-#+begin_src emacs-lisp
-;; (ghub-post "/user/repos" '((name . "org-cthulhu")))
-;; (magit-init (file-name-directory buffer-file-name))
-;; (magit-remote-add "origin" (concat "git@github.com:marzikill/" "org-cthulhu" ".git"))))
-#+end_src
-
-#+RESULTS:
