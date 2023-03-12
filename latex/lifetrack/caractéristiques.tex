@@ -1,0 +1,109 @@
+\documentclass{divers}
+
+\renewcommand{\destinataire}{Joueurs}
+\renewcommand{\numberdoc}{0}
+\newcommand\twodigits[1]{%
+  \ifnum#1<10 0#1\else #1\fi
+}
+\newcommand{\tablenum}[5]{
+  \begin{tikzpicture}
+    \newcommand{\scale}{#1}
+    \newcommand{\ncol}{#2}
+    \newcommand{\startpos}{#3}
+    \newcommand{\last}{#4}
+    \newcommand{\labelnum}{#5}
+    \foreach \i in {1,...,\last}
+    {
+      \pgfmathtruncatemacro{\y}{(\i + \startpos)/\ncol};
+      \pgfmathtruncatemacro{\x}{(\i + \startpos) - \ncol*\y};
+      \draw (\x/\scale, -\y/\scale) node {\twodigits{\i}};
+    }
+    \node (chance) at (2, 0) {\labelnum} ;
+  \end{tikzpicture}
+}
+
+\usepackage{tasks}
+\settasks{label=\textbf{\alph*.}, label-format=\bfseries, label-offset=1em, label-align=right, before-skip =\smallskipamount, after-item-skip=0pt}
+
+\usepackage{makecell}
+\usepackage{array}
+
+\input{dice}
+% macros for nodes, #1 = dice value
+
+\def\fourside#1{node[fourside,draw=black]{#1}}
+\def\sixside#1{node[sixside,draw=black]{#1}}
+\def\eightside#1{node[eightside,draw=black]{#1}}
+\def\tenside#1{node[tenside,draw=black]{#1}}
+\def\twelveside#1{node[twelveside,draw=black]{#1}}
+\def\twentyside#1{node[twentyside,draw=black]{#1}}
+
+
+\title{Suivi des caractéristiques}
+
+\begin{document}
+
+\looped{2}{
+  \noindent \makebox[\textwidth]{
+    \begin{tabular}{|c|c|c|c|c|c|c|c|}
+      \hline
+      \begin{tikzpicture}[baseline=-0.5em]
+        \node[fourside] (d4) at (0,0) {$4$} ;
+      \end{tikzpicture} &
+     \texttt{D4} et \texttt{D2 = (D4)/2} &
+     \begin{tikzpicture}[baseline=-0.5em]
+     \node[sixside] (d6) at (0,0) {$6$} ;
+   \end{tikzpicture} &
+   \texttt{D6} et \texttt{D3 = (D6)/2} &
+                                         \begin{tikzpicture}[baseline=-0.5em]
+                                                                                                                            \node[eightside] (d8) at (0,0) {$8$} ; 
+                                                                                                                          \end{tikzpicture} &
+                                                                                                                                              \texttt{D8} &
+                                                                                                                                                            \begin{tikzpicture}[baseline=-0.5em]
+                                                                                                                                                              \node[tenside] (d10) at (0,0) {$40$} ;
+                                                                                                                                                              \node[tenside] (d10) at (1,0) {$8$} ;
+                                                                                                                                                            \end{tikzpicture} &
+                                                                                                                                                                                \texttt{D10} et \texttt{D100 = D10 D10} \\
+      \hline
+    \end{tabular} 
+  }
+  \vspace{1em}
+
+\noindent \makebox[\textwidth]{
+  \begin{tabular}{|M{0.25\linewidth}|M{0.85\linewidth}|}
+    \hline
+    \makecell{
+    \centerline{\adforn{64} \textbf{\textsc{Points de Vie}} \adforn{36}} \\[0.5em]
+    \tablenum{1.5}{4}{-1}{20}{}
+    }
+    & \makecell{
+      \centerline{\adforn{64} \textbf{\textsc{Santé mentale}} \adforn{36}} \\[0.5em]
+    \tablenum{1.5}{21}{5}{99}{Folie perpétuelle}
+    } \\
+
+    \hline
+    \makecell{
+    \centerline{\adforn{64} \textbf{\textsc{Points de Magie}} \adforn{36}} \\[0.5em]
+    \tablenum{1.5}{4}{-1}{20}{}
+    }
+    & \makecell{
+      \centerline{\adforn{64} \textbf{\textsc{Chance}} \adforn{36}} \\[0.5em]
+    \tablenum{1.5}{21}{5}{99}{Aucune chance}
+    } \\
+    \hline
+  \end{tabular}
+}
+
+  \vspace{1em}
+  \begin{itemize*}[label=$\square$, itemjoin = \hspace{1em}]
+  \item Inconscient
+  \item Mourant
+  \item Blessé grave
+  \item Folie temporaire
+  \item Folie permanente
+  \end{itemize*}
+  \vfill
+}
+
+
+\end{document}

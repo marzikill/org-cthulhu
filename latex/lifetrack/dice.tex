@@ -1,0 +1,150 @@
+% tetrahedron
+
+\pgfdeclareshape{fourside}{
+
+\anchor{center}{\pgfpointorigin} % within the node, (0,0) is the center
+\anchor{text}    % this is used to center the text in the node
+    {\pgfpoint{-.5\wd\pgfnodeparttextbox}{-.5\ht\pgfnodeparttextbox}}
+
+\foregroundpath{ % draw border
+ \pgfpathmoveto{\pgfpoint{0cm}{.3cm}}
+ \pgfpathlineto{\pgfpoint{.433cm}{-.45cm}}
+ \pgfpathlineto{\pgfpoint{-.433cm}{-.45cm}}
+ \pgfpathlineto{\pgfpoint{0cm}{.3cm}}
+ \pgfusepath{draw}  %draw border
+ \pgfusepath{draw}  %draw rectangle
+}}
+
+% cubic
+
+\pgfdeclareshape{sixside}{
+\anchor{center}{\pgfpointorigin}    % within the node, (0,0) is the center
+
+\anchor{text}   % this is used to center the text in the node
+    {\pgfpoint{-.5\wd\pgfnodeparttextbox}{-.5\ht\pgfnodeparttextbox}}
+
+\foregroundpath{ % draw border
+ \pgfpathrectanglecorners{\pgfpoint{.4cm}{.4cm}}{\pgfpoint{-.4cm}{-.4cm}}
+ \pgfusepath{draw}  %draw rectangle
+}}
+
+% octahedron
+
+\pgfdeclareshape{eightside}{
+\anchor{center}{\pgfpointorigin}    % within the node, (0,0) is the center
+
+\anchor{text}   % this is used to center the text in the node
+    {\pgfpoint{-.5\wd\pgfnodeparttextbox}{-.5\ht\pgfnodeparttextbox}}
+
+\foregroundpath{ % draw border
+ \pgfpathmoveto{\pgfpoint{0cm}{.5cm}}
+ \pgfpathlineto{\pgfpoint{.433cm}{.25cm}}
+ \pgfpathlineto{\pgfpoint{.433cm}{-.25cm}}
+ \pgfpathlineto{\pgfpoint{0cm}{-.5cm}}
+ \pgfpathlineto{\pgfpoint{-.433cm}{-.25cm}}
+ \pgfpathlineto{\pgfpoint{-.433cm}{.25cm}}
+ \pgfpathlineto{\pgfpoint{0cm}{.5cm}}
+ \pgfpathlineto{\pgfpoint{.433cm}{-.25cm}}
+ \pgfpathlineto{\pgfpoint{-.433cm}{-.25cm}}
+ \pgfpathlineto{\pgfpoint{0cm}{.5cm}}
+ \pgfusepath{draw}  %draw interiaor
+}}
+
+% decahedron
+
+\pgfdeclareshape{tenside}{
+\anchor{center}{\pgfpointorigin}    % within the node, (0,0) is the center
+
+\anchor{text}   % this is used to center the text in the node
+    {\pgfpoint{-.5\wd\pgfnodeparttextbox}{-.5\ht\pgfnodeparttextbox}}
+
+\foregroundpath{ % draw border
+ \pgfpathmoveto{\pgfpoint{0cm}{.5cm}}
+ \pgfpathlineto{\pgfpoint{.294cm}{-.154cm}}
+ \pgfpathlineto{\pgfpoint{0cm}{-.3cm}}
+ \pgfpathlineto{\pgfpoint{-.294cm}{-.154cm}}
+ \pgfpathlineto{\pgfpoint{0cm}{.5cm}}
+ \pgfpathlineto{\pgfpoint{.475cm}{.1cm}}
+ \pgfpathlineto{\pgfpoint{.475cm}{-.1cm}}
+ \pgfpathlineto{\pgfpoint{0cm}{-.5cm}}
+ \pgfpathlineto{\pgfpoint{-.475cm}{-.1cm}}
+ \pgfpathlineto{\pgfpoint{-.475cm}{.1cm}}
+ \pgfpathlineto{\pgfpoint{0cm}{.5cm}}
+ \pgfpathmoveto{\pgfpoint{.294cm}{-.154cm}}
+ \pgfpathlineto{\pgfpoint{.475cm}{-.1cm}}
+ \pgfpathmoveto{\pgfpoint{-.475cm}{-.1cm}}
+ \pgfpathlineto{\pgfpoint{-.294cm}{-.154cm}}
+ \pgfpathmoveto{\pgfpoint{0cm}{-.5cm}}
+ \pgfpathlineto{\pgfpoint{0cm}{-.3cm}}
+ \pgfusepath{draw}  %draw interiaor
+}}
+
+% dodecahedron
+
+\pgfdeclareshape{twelveside}{
+\anchor{center}{\pgfpointorigin}    % within the node, (0,0) is the center
+
+\anchor{text}   % this is used to center the text in the node
+    {\pgfpoint{-.5\wd\pgfnodeparttextbox}{-.5\ht\pgfnodeparttextbox}}
+
+\foregroundpath{ % draw border
+ \pgfpathmoveto{\pgfpoint{0cm}{.5cm}}
+ \pgfpathlineto{\pgfpoint{0.294cm}{.405cm}}
+ \pgfpathlineto{\pgfpoint{.475cm}{.173cm}}
+ \pgfpathlineto{\pgfpoint{.475cm}{-.173cm}}
+ \pgfpathlineto{\pgfpoint{.294cm}{-.405cm}}
+ \pgfpathlineto{\pgfpoint{0cm}{-.5cm}}
+ \pgfpathlineto{\pgfpoint{-.294cm}{-.405cm}}
+ \pgfpathlineto{\pgfpoint{-.475cm}{-.173cm}}
+ \pgfpathlineto{\pgfpoint{-.475cm}{.173cm}}
+ \pgfpathlineto{\pgfpoint{-.294cm}{.405cm}}
+ \pgfpathlineto{\pgfpoint{0cm}{.5cm}}
+ \pgfpathlineto{\pgfpoint{0cm}{.349cm}}
+ \pgfpathlineto{\pgfpoint{.332cm}{.108cm}}
+ \pgfpathlineto{\pgfpoint{.205cm}{-.282cm}}
+ \pgfpathlineto{\pgfpoint{-.205cm}{-.282cm}}
+ \pgfpathlineto{\pgfpoint{-.332cm}{.108cm}}
+ \pgfpathlineto{\pgfpoint{0cm}{.349cm}}
+ \pgfpathmoveto{\pgfpoint{.475cm}{.173cm}}
+ \pgfpathlineto{\pgfpoint{.332cm}{.108cm}}
+ \pgfpathmoveto{\pgfpoint{.294cm}{-.405cm}}
+ \pgfpathlineto{\pgfpoint{.205cm}{-.282cm}}
+ \pgfpathmoveto{\pgfpoint{-.294cm}{-.405cm}}
+ \pgfpathlineto{\pgfpoint{-.205cm}{-.282cm}}
+ \pgfpathmoveto{\pgfpoint{-.475cm}{.173cm}}
+ \pgfpathlineto{\pgfpoint{-.332cm}{.108cm}}
+ \pgfusepath{draw}  %draw interiaor
+}}
+
+% icosohedron
+
+\pgfdeclareshape{twentyside}{
+\anchor{center}{\pgfpointorigin} % within the node, (0,0) is the center
+
+\anchor{text}    % this is used to center the text in the node
+    {\pgfpoint{-.5\wd\pgfnodeparttextbox}{-.5\ht\pgfnodeparttextbox}}
+
+\foregroundpath{ % draw border
+ \pgfpathmoveto{\pgfpoint{0cm}{.5cm}}
+ \pgfpathlineto{\pgfpoint{.454cm}{.262cm}}
+ \pgfpathlineto{\pgfpoint{.454cm}{-.262cm}}
+ \pgfpathlineto{\pgfpoint{0cm}{-.5cm}}
+ \pgfpathlineto{\pgfpoint{-.454cm}{-.262cm}}
+ \pgfpathlineto{\pgfpoint{-.454cm}{.262cm}}
+ \pgfpathlineto{\pgfpoint{0cm}{.5cm}}
+ \pgfpathlineto{\pgfpoint{0cm}{.292cm}}
+ \pgfpathlineto{\pgfpoint{.253cm}{-.146cm}}
+ \pgfpathlineto{\pgfpoint{-.253cm}{-.146cm}}
+ \pgfpathlineto{\pgfpoint{0cm}{.292cm}}
+ \pgfpathlineto{\pgfpoint{.454cm}{.262cm}}
+ \pgfpathlineto{\pgfpoint{.253cm}{-.146cm}}
+ \pgfpathlineto{\pgfpoint{0cm}{-.5cm}}
+ \pgfpathlineto{\pgfpoint{-.253cm}{-.146cm}}
+ \pgfpathlineto{\pgfpoint{-.454cm}{.262cm}}
+ \pgfpathlineto{\pgfpoint{0cm}{.292cm}}
+ \pgfpathmoveto{\pgfpoint{.454cm}{-.262cm}}
+ \pgfpathlineto{\pgfpoint{.253cm}{-.146cm}}
+ \pgfpathmoveto{\pgfpoint{-.454cm}{-.262cm}}
+ \pgfpathlineto{\pgfpoint{-.253cm}{-.146cm}}
+ \pgfusepath{draw}  %draw interiaor
+}}

@@ -32,12 +32,11 @@
 : get-name
 
 #+begin_src emacs-lisp
-(get-characters-name)
-(get-name (select-character))
+;; (get-characters-name)
+;; (get-name (select-character))
 #+end_src
 
 #+RESULTS:
-: La goule
 
 * Manipulation d'un personnage
 ** Récupérer la section de ses tables 
@@ -58,7 +57,7 @@
 #+end_src
 
 #+RESULTS:
-| headline | (:raw-value Tables :begin 9481 :end 12621 :pre-blank 0 :contents-begin 9492 :contents-end 12621 :level 3 :priority nil :tags nil :todo-keyword nil :todo-type nil :post-blank 0 :footnote-section-p nil :archivedp nil :commentedp nil :post-affiliated 9481 :title (Tables) :parent (headline (:raw-value Bobby Watson : un fameux concierge :begin 8985 :end 12622 :pre-blank 0 :contents-begin 9050 :contents-end 12621 :level 2 :priority nil :tags nil :todo-keyword nil :todo-type nil :post-blank 1 :footnote-section-p nil :archivedp nil :commentedp nil :post-affiliated 8985 :title (Bobby Watson : un fameux concierge) :parent (headline (:raw-value Personnages tests :begin 8907 :end 15779 :pre-blank 0 :contents-begin 8985 :contents-end 15778 :level 1 :priority nil :tags (personnage) :todo-keyword nil :todo-type nil :post-blank 1 :footnote-section-p nil :archivedp nil :commentedp nil :post-affiliated 8907 :title (Personnages tests) :parent (org-data nil (section (:begin 3 :end 133 :contents-begin 3 :contents-end 132 :post-blank 1 :post-affiliated 3 :parent #5) (src-block (:language emacs-lisp :switches nil :parameters :tangle org-cthulhu.el :begin 3 :end 112 :number-lines nil :preserve-indent nil :retain-labels t :use-labels t :label-fmt nil :value (require 'cl-lib) |
+| headline | (:raw-value Tables :begin 13178 :end 16164 :pre-blank 0 :contents-begin 13189 :contents-end 16164 :level 3 :priority nil :tags nil :todo-keyword nil :todo-type nil :post-blank 0 :footnote-section-p nil :archivedp nil :commentedp nil :post-affiliated 13178 :title (Tables) :parent (headline (:raw-value Bobby Watson : un fameux concierge :begin 12682 :end 16165 :pre-blank 0 :contents-begin 12747 :contents-end 16164 :level 2 :priority nil :tags nil :todo-keyword nil :todo-type nil :post-blank 1 :footnote-section-p nil :archivedp nil :commentedp nil :post-affiliated 12682 :title (Bobby Watson : un fameux concierge) :parent (headline (:raw-value Personnages tests :begin 12604 :end 19322 :pre-blank 0 :contents-begin 12682 :contents-end 19321 :level 1 :priority nil :tags (personnage) :todo-keyword nil :todo-type nil :post-blank 1 :footnote-section-p nil :archivedp nil :commentedp nil :post-affiliated 12604 :title (Personnages tests) :parent (org-data nil (section (:begin 2 :end 132 :contents-begin 2 :contents-end 131 :post-blank 1 :post-affiliated 2 :parent #5) (src-block (:language emacs-lisp :switches nil :parameters :tangle org-cthulhu.el :begin 2 :end 111 :number-lines nil :preserve-indent nil :retain-labels t :use-labels t :label-fmt nil :value (require 'cl-lib) |
 
 # #+begin_src emacs-lisp
 # ;; Récupérer les tables du personnage sélectionné dans la liste. Oh tiens : =)
@@ -283,7 +282,7 @@ Page 35 manuel du gardien.
 #+end_src
 
 #+RESULTS:
-: 2 [20, 10, 4] : Réussite extrême
+: 52 [35, 17, 7] : Échec
 
 
 #+begin_src emacs-lisp
@@ -334,7 +333,7 @@ Page 35 manuel du gardien.
 #+end_src
 
 #+RESULTS:
-: Succès de Bobby Watson : un fameux concierge (Réussite extrême vs Échec)
+: Pas de succès
 
 * Gestion des personnages
 ** Initialiser les caractéristiques dérivées
@@ -352,7 +351,7 @@ Page 35 manuel du gardien.
     `(("Impact" . ,(format "| -- Impact | %s |  |  |" imp))
       ("Carrure" . ,(format "| -- Carrure | %s |  |  |" carr))
       ("Esquive" . ,(format "| Esquive | %s | %s | %s |" esq (majeur esq) (extreme esq)))
-      ;; ("Langue maternelle" . ,(format "| Langue maternelle | %s | %s | %s |" langue (majeur langue) (extreme langue)))
+      ("Langue maternelle" . ,(format "| Langue maternelle | %s | %s | %s |" langue (majeur langue) (extreme langue)))
       ("Santé mentale" . ,(format "| Santé mentale | %s | %s | %s |" san (majeur san) (extreme san)))
       ("Points de magie" . ,(format "| Points de magie | %s |  |  |" pm))
       ("Points de vie" . ,(format "| Points de vie | %s |  |  |" pdv))
