@@ -1,0 +1,178 @@
+#+LATEX_HEADER: \input{custom}
+#+OPTIONS: toc:nil title:nil
+
+* Personnages                                                    :personnage:
+
+** Le personnage test
+#+LATEX: \begin{twocols}
+*** En bref 
+
+3 lignes rapidement *lisibles*.
+
+*** Histoire
+
+Lore. 
+
+*** Particularités
+
+- Description ::
+  #+LATEX: ~\\[2em]
+- Traits de caractère :: 
+  #+LATEX: ~\\[2em]
+- Idéologies et croyances :: 
+  #+LATEX: ~\\[2em]
+- Personnes importantes :: 
+  #+LATEX: ~\\[2em]
+- Lieu important :: 
+  #+LATEX: ~\\[2em]
+- Possessions importantes :: 
+  #+LATEX: ~\\[2em]
+- Phobies et manies :: 
+  #+LATEX: ~\\[2em]
+
+*** Équipement et possessions
+
+
+- Items :: 
+  #+LATEX: ~\\[2em]
+- Armes de poing :: 
+  #+LATEX: ~\\[2em]
+- Fusils :: 
+  #+LATEX: ~\\[2em]
+- Mitraillettes :: 
+  #+LATEX: ~\\[2em]
+
+#+LATEX: \end{twocols}
+#+LATEX: \pagebreak
+#+LATEX: \newgeometry{a4paper, total={170mm,257mm}, left=20mm, top=10mm, bottom=10mm}
+#+LATEX: \begin{twocols}
+
+*** Tables
+**** Caractéristiques 
+
+#+ATTR_LATEX: :environment mytabular 
+| FOR |  |  |  |
+| CON |  |  |  |
+| TAI |  |  |  |
+| DEX |  |  |  |
+| INT |  |  |  |
+| APP |  |  |  |
+| POU |  |  |  |
+| EDU |  |  |  |
+| AGE |  |  |  |
+#+TBLFM: $3=round($2/2)::$4=round($2/5)
+
+**** Santé physique et psychique
+
+#+ATTR_LATEX: :environment mytabular 
+| Santé mentale   | | |  |
+| Points de vie   | | |  |
+| Points de magie | | |  |
+| Chance          | | |  |
+#+TBLFM: $3=round($2/2)::$4=round($2/5)
+
+**** Caractéristiques de combat
+
+
+#+ATTR_LATEX: :environment mytabular 
+| Corps à corps (1D3)          | 25 |  |  |
+| -- Carrure                   |    |  |  |
+| -- Impact                    |    |  |  |
+| Armes à feu (armes de poing) | 20 |  |  |
+| Armes à feu (fusils)         | 25 |  |  |
+| Armes à feu (mitraillettes)  | 15 |  |  |
+| -- Esquive                   |    |  |  |
+#+TBLFM: $3=round($2/2)::$4=round($2/5)
+
+**** Compétences
+***** Sociales
+
+#+ATTR_LATEX: :environment mytabular 
+| Baratin      |  5 | 3 | 1 |
+| Charme       | 15 | 8 | 3 |
+| Intimidation | 15 | 8 | 3 |
+| Persuasion   | 10 | 5 | 2 |
+| Psychologie  | 10 | 5 | 2 |
+#+TBLFM: $3=round($2/2)::$4=round($2/5)
+
+***** Se repérer
+
+#+ATTR_LATEX: :environment mytabular 
+| Bibliothèque        | 20 | 10 | 4 |
+| Orientation         | 10 |  5 | 2 |
+| Pister              | 10 |  5 | 2 |
+| Trouver objet caché | 25 | 13 | 5 |
+#+TBLFM: $3=round($2/2)::$4=round($2/5)
+
+***** Cthulhu
+
+#+ATTR_LATEX: :environment mytabular 
+| Occultisme | 5 | 3 | 1 |
+| Mythos     | 0 | 0 | 0 |
+#+TBLFM: $3=round($2/2)::$4=round($2/5)
+
+***** Soins
+
+#+ATTR_LATEX: :environment mytabular 
+| Premier soins | 30 | 15 | 6 |
+| Médecine      |  1 |  1 | 0 |
+| Psychanalyse  |  1 |  1 | 0 |
+#+TBLFM: $3=round($2/2)::$4=round($2/5)
+
+***** Se déplacer
+
+#+ATTR_LATEX: :environment mytabular 
+| Conduite   | 20 | 10 | 4 |
+| Grimper    | 20 | 10 | 4 |
+| Lancer     | 20 | 10 | 4 |
+| Nager      | 20 | 10 | 4 |
+| Pilotage   |  1 |  1 | 0 |
+| Sauter     | 20 | 10 | 4 |
+| Survie     | 10 |  5 | 2 |
+| Écouter    | 20 | 10 | 4 |
+| Équitation |  5 |  3 | 1 |
+#+TBLFM: $3=round($2/2)::$4=round($2/5)
+
+***** Filouterie
+
+#+ATTR_LATEX: :environment mytabular 
+| Discrétion | 20 | 10 | 4 |
+| Imposture  |  5 |  3 | 1 |
+| Crochetage |  1 |  1 | 0 |
+| Pickpocket | 10 |  5 | 2 |
+#+TBLFM: $3=round($2/2)::$4=round($2/5)
+
+***** Connaissances théoriques
+
+#+ATTR_LATEX: :environment mytabular 
+| Anthropologie     |   1 |              1 |              0 |
+| Archéologie       |   1 |              1 |              0 |
+| Arts et métiers   |     |              0 |              0 |
+| Droit             |   5 |              3 |              1 |
+| Histoire          |   5 |              3 |              1 |
+| Langue maternelle | 0 | | |
+| Langues (autre)   |   1 |              1 |              0 |
+| Naturalisme       |  10 |              5 |              2 |
+| Sciences          |   1 |              1 |              0 |
+#+TBLFM: $3=round($2/2)::$4=round($2/5)
+
+***** Connaissances techniques
+
+#+ATTR_LATEX: :environment mytabular 
+| Mécanique   | 10 | 5 | 2 |
+| Électricité | 10 | 5 | 2 |
+#+TBLFM: $3=round($2/2)::$4=round($2/5)
+
+***** Argent 
+
+#+ATTR_LATEX: :environment mytabular 
+| Comptabilité | 5 | 3 | 1 |
+| Crédit       |  0 |   |   |
+| Estimation   | 5 | 3 | 1 |
+#+TBLFM: $3=round($2/2)::$4=round($2/5)
+
+
+*** Remarques                                                      :ignore:
+
+#+LATEX: \end{twocols}
+#+LATEX: \pagebreak
