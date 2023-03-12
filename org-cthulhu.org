@@ -166,19 +166,6 @@
 : cthulhu-select-set-carac
 
 * Système de jeu
-
-** Caractéristiques
-
-#+begin_src emacs-lisp
-(defun majeur (carac)
-  (round (/ carac 2)))
-(defun extreme (carac)
-  (round (/ carac 5)))
-#+end_src
-
-#+RESULTS:
-: extreme
-
 ** Caractéristiques dérivées
 
 Page 35 manuel du gardien.
@@ -214,54 +201,17 @@ Page 35 manuel du gardien.
 #+RESULTS:
 : carrure
 
-** Tests de caractéristique
-
-#+begin_src emacs-lisp :tangle org-cthulhu.el
-(defun roll100 (&optional modif)
-  "Lance un dé 100 avec des dés bonus/malus "
-  (if (not modif)
-      (random 100)
-  (let* ((choose-dice-fun (if (< 0 modif) #'min #'max))
-         (dizaines-chiffre (apply choose-dice-fun
-                                  (loop for i below (1+ (abs modif))
-                                        collect (random 10))))
-         (unités-chiffre (random 10)))
-    (+ unités-chiffre (* dizaines-chiffre 10))))))
-    ;; (format "%d%d" dizaines-chiffre unités-chiffre)))
-
-(defun roll (Ds F &optional modif)
-  "Renvoie une liste de lancés de dés. "
-  (if (= F 100)
-      (loop for i below Ds
-	    collect (roll100 modif))
-    (loop for i below Ds
-	  collect (1+ (random F)))))
-#+end_src
-
-#+RESULTS:
-: roll100
+** Types de réussites
 
 #+begin_src emacs-lisp
-(defun roll-caracter-characteristic ()
-  (let* ((personnage (select-character))
-         (carac (select-get-carac personnage))
-         (r (roll100 0))
-         (mess (format "%d [%d, %d, %d] : " r carac (majeur carac) (extreme carac))))
-    (cond
-     ((<= r (extreme carac)) (concat mess "réussite extrême"))
-     ((<= r (majeur carac)) (concat mess "réussite majeure"))
-     ((<= r carac) (concat mess "réussite régulière"))
-     (t (concat mess "échec"))
-     (t (concat mess "échec critique")))
-    ))
-
-(roll-caracter-characteristic)
+(defun majeur (carac)
+  (round (/ carac 2)))
+(defun extreme (carac)
+  (round (/ carac 5)))
 #+end_src
 
 #+RESULTS:
-: 41 [50, 25, 10] : réussite régulière
-
-** Tests opposés
+: extreme
 
 #+begin_src emacs-lisp
 (defvar success-types
@@ -291,6 +241,69 @@ Page 35 manuel du gardien.
 
 #+RESULTS:
 : roll-success
+
+** Tests de caractéristique
+
+
+#+begin_src emacs-lisp :tangle org-cthulhu.el
+(defun roll100 (&optional modif)
+  "Lance un dé 100 avec des dés bonus/malus "
+  (if (not modif)
+      (random 100)
+  (let* ((choose-dice-fun (if (< 0 modif) #'min #'max))
+         (dizaines-chiffre (apply choose-dice-fun
+                                  (loop for i below (1+ (abs modif))
+                                        collect (random 10))))
+         (unités-chiffre (random 10)))
+    (+ unités-chiffre (* dizaines-chiffre 10))))))
+    ;; (format "%d%d" dizaines-chiffre unités-chiffre)))
+
+(defun roll (Ds F &optional modif)
+  "Renvoie une liste de lancés de dés. "
+  (if (= F 100)
+      (loop for i below Ds
+	    collect (roll100 modif))
+    (loop for i below Ds
+	  collect (1+ (random F)))))
+#+end_src
+
+#+RESULTS:
+: roll100
+
+#+begin_src emacs-lisp
+(defun select-roll-character-carac (&optional modif)
+  (interactive)
+  (let* ((perso (select-character))
+         (carac (select-get-carac perso))
+         (roll (roll100 modif))
+         (out (roll-success roll carac)))
+    (message (format "%d [%d, %d, %d] : %s" roll carac (majeur carac) (extreme carac) (get-success out)))))
+
+(select-roll-character-carac)
+#+end_src
+
+#+RESULTS:
+: 2 [20, 10, 4] : Réussite extrême
+
+
+#+begin_src emacs-lisp
+(defun my-test (&optional arg arg2)
+  (interactive (list (if current-prefix-arg
+                         (read-from-minibuffer "MyPrompt: ")
+                       nil)))
+  (if arg
+      (message arg2)
+    (message "NO ARG")))
+
+#+end_src
+
+#+RESULTS:
+: my-test
+
+
+
+** Tests opposés
+
 
 
 #+begin_src emacs-lisp
