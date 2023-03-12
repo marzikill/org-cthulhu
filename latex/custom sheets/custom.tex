@@ -1,0 +1,71 @@
+
+\usepackage{geometry}
+ \geometry{
+ a4paper,
+ total={170mm,257mm},
+ left=20mm,
+ top=20mm,
+ }
+ \usepackage{multicol}
+ \pagestyle{empty}
+
+ \usepackage{titlesec}
+
+\titleformat
+{\chapter} % command
+[display] % shape
+{\bfseries\Large\itshape} % format
+{Story No. \ \thechapter} % label
+{0.5ex} % sep
+{
+    \rule{\textwidth}{1pt}
+    \vspace{1ex}
+    \centering
+} % before-code
+[
+\vspace{-0.5ex}%
+\rule{\textwidth}{0.3pt}
+] % after-code
+
+
+\titleformat{\section}
+{\Large\bfseries\scshape}
+{}{0em}{}
+
+\titleformat{\subsection}
+{\normalfont\bfseries}
+{\includegraphics[height=1em]{c.jpg}}{0.5em}{}
+
+\titleformat{\subsubsection}
+{\bfseries}
+{}{0.5em}{}
+
+
+\usepackage{tabularx}
+\usepackage[table]{xcolor}
+\usepackage{colortbl}
+\usepackage{tablestyles}
+
+\newenvironment{mytabular}[1]
+{\begin{center}
+\tablestyle[sansbold]
+\renewcommand{\arraystretch}{1.28}
+\begin{tabular}{L{4.5cm}rrr}
+\theadstart
+    \thead Caractéristique &
+    \thead Nor. &
+    \thead Maj. &
+    \thead Ext. \\
+\tbody}
+    { 
+ \tend
+\end{tabular}
+\end{center}
+    }
+
+    \newenvironment{twocols}[0]
+    {\begin{multicols*}{2}}
+      {\end{multicols*}}
+    
+    \usepackage{enumitem}
+    \setlist[enumerate, 1]{font=\bfseries, label=, wide=0pt, nosep}

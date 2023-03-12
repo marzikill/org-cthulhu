@@ -1,4 +1,9 @@
-** ${0: Nom du personnage}
+# key: niC
+# name: nouvel investigateur Appel de Cthulhu
+# --
+
+
+#+LATEX: \begin{twocols}
 *** En bref 
 
 3 lignes rapidement *lisibles*.
@@ -10,24 +15,41 @@ Lore.
 *** Particularités
 
 - Description ::
+  #+LATEX: ~\\\\[2em]
 - Traits de caractère :: 
+  #+LATEX: ~\\\\[2em]
 - Idéologies et croyances :: 
+  #+LATEX: ~\\\\[2em]
 - Personnes importantes :: 
+  #+LATEX: ~\\\\[2em]
 - Lieu important :: 
+  #+LATEX: ~\\\\[2em]
 - Possessions importantes :: 
+  #+LATEX: ~\\\\[2em]
 - Phobies et manies :: 
+  #+LATEX: ~\\\\[2em]
 
 *** Équipement et possessions
 
-- items :: divers
-- Armes :: couteau (1D8)
-- Armes de poing :: Derringer calibre 25 (1D6) 
-- Fusils :: Carabine (2D6)  
-- Mitraillettes :: Thompson (1D10 + 2) 
+
+- Items :: une gourde, un couteau de poche, matériel d'écriture, des allumettes et un porte-cigarettes en alluminium rempli de 10 cigarettes de qualité supérieure. 
+  #+LATEX: ~\\\\[2em]
+- Armes de poing :: 
+  #+LATEX: ~\\\\[2em]
+- Fusils :: 
+  #+LATEX: ~\\\\[2em]
+- Mitraillettes :: 
+  #+LATEX: ~\\\\[2em]
+
+#+LATEX: \end{twocols}
+#+LATEX: \pagebreak
+#+LATEX: \newgeometry{a4paper, total={170mm,257mm}, left=20mm, top=10mm, bottom=10mm}
+#+LATEX: \begin{twocols}
 
 *** Tables
 **** Caractéristiques 
 
+#+ATTR_LATEX: :environment mytabular 
 | FOR |  |  |  |
 | CON |  |  |  |
 | TAI |  |  |  |
@@ -41,6 +63,7 @@ Lore.
 
 **** Santé physique et psychique
 
+#+ATTR_LATEX: :environment mytabular 
 | Santé mentale   | | |  |
 | Points de vie   | | |  |
 | Points de magie | | |  |
@@ -50,6 +73,7 @@ Lore.
 **** Caractéristiques de combat
 
 
+#+ATTR_LATEX: :environment mytabular 
 | Corps à corps (1D3)          | 25 |  |  |
 | -- Carrure                   |    |  |  |
 | -- Impact                    |    |  |  |
@@ -62,6 +86,7 @@ Lore.
 **** Compétences
 ***** Sociales
 
+#+ATTR_LATEX: :environment mytabular 
 | Baratin      |  5 | 3 | 1 |
 | Charme       | 15 | 8 | 3 |
 | Intimidation | 15 | 8 | 3 |
@@ -71,6 +96,7 @@ Lore.
 
 ***** Se repérer
 
+#+ATTR_LATEX: :environment mytabular 
 | Bibliothèque        | 20 | 10 | 4 |
 | Orientation         | 10 |  5 | 2 |
 | Pister              | 10 |  5 | 2 |
@@ -79,12 +105,14 @@ Lore.
 
 ***** Cthulhu
 
+#+ATTR_LATEX: :environment mytabular 
 | Occultisme | 5 | 3 | 1 |
 | Mythos     | 0 | 0 | 0 |
 #+TBLFM: \$3=round(\$2/2)::\$4=round(\$2/5)
 
 ***** Soins
 
+#+ATTR_LATEX: :environment mytabular 
 | Premier soins | 30 | 15 | 6 |
 | Médecine      |  1 |  1 | 0 |
 | Psychanalyse  |  1 |  1 | 0 |
@@ -92,6 +120,7 @@ Lore.
 
 ***** Se déplacer
 
+#+ATTR_LATEX: :environment mytabular 
 | Conduite   | 20 | 10 | 4 |
 | Grimper    | 20 | 10 | 4 |
 | Lancer     | 20 | 10 | 4 |
@@ -105,6 +134,7 @@ Lore.
 
 ***** Filouterie
 
+#+ATTR_LATEX: :environment mytabular 
 | Discrétion | 20 | 10 | 4 |
 | Imposture  |  5 |  3 | 1 |
 | Crochetage |  1 |  1 | 0 |
@@ -113,12 +143,13 @@ Lore.
 
 ***** Connaissances théoriques
 
+#+ATTR_LATEX: :environment mytabular 
 | Anthropologie     |   1 |              1 |              0 |
 | Archéologie       |   1 |              1 |              0 |
 | Arts et métiers   |     |              0 |              0 |
 | Droit             |   5 |              3 |              1 |
 | Histoire          |   5 |              3 |              1 |
-| Langue maternelle |   0 | | |
+| Langue maternelle | 0 | | |
 | Langues (autre)   |   1 |              1 |              0 |
 | Naturalisme       |  10 |              5 |              2 |
 | Sciences          |   1 |              1 |              0 |
@@ -126,13 +157,21 @@ Lore.
 
 ***** Connaissances techniques
 
+#+ATTR_LATEX: :environment mytabular 
 | Mécanique   | 10 | 5 | 2 |
 | Électricité | 10 | 5 | 2 |
 #+TBLFM: \$3=round(\$2/2)::\$4=round(\$2/5)
 
 ***** Argent 
 
+#+ATTR_LATEX: :environment mytabular 
 | Comptabilité | 5 | 3 | 1 |
-| Crédit       | 0 |   |   |
+| Crédit       |  0 |   |   |
 | Estimation   | 5 | 3 | 1 |
 #+TBLFM: \$3=round(\$2/2)::\$4=round(\$2/5)
+
+
+*** Remarques                                                      :ignore:
+
+#+LATEX: \end{twocols}
+#+LATEX: \pagebreak
