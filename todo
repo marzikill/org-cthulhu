@@ -1,0 +1,21 @@
+
+TODO :
+- Système de jeu de manière générale
+  - gestion de l'inventaire : selectionner source de dégâts
+  - panne pour arme
+  - gestion des caractéristiques modifiables : santé, santé mentale, chance etc. 
+  - gestion des états d'un personnage (folie, nombre de round, etc)
+- aide à la rédaction :
+  - nouvel objet
+  - nouveau personnage
+    - joueur
+    - monstre
+  - nouveau lieu
+  - nouvel événement
+  - insérer un test de caractéristique
+  - nouvelle scène (participants, dex, ordre de passage)
+
+
+
+Améliorations
+- Détecter les personnages (tag "personnage") dans un entête de niveau >= 2

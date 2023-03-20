@@ -9,6 +9,7 @@
 : org-ml
 
 * TODO Pistes d'amélioration
+** Ajout d'éléments
 ** Manipulation des personnages
 
 - [ ] ~cthulhu-select-set-carac~ devrait indiquer dans le minibuffer ce qu'il a fait
@@ -39,6 +40,8 @@
 - [ ] trouver quoi mettre au recto du lifetracker
   un récapitulatif de certaines règles ?
 
+
+
 * Import des personnages 
 
 #+begin_src emacs-lisp
@@ -68,6 +71,59 @@
 #+end_src
 
 #+RESULTS:
+| Bobby Watson : un fameux concierge | Ybbo Nostaw : cambrioleur | La goule |
+
+* Ajout de sous-sections
+
+#+begin_src emacs-lisp
+(defvar default-sections
+  '("Objets"
+   "Personnages"
+   "Monstres"
+   "Lieux"
+   "Événements"
+   "Documentation"))
+
+(defun get-document-sections ()
+  (--map (org-ml-get-property :raw-value it) (org-ml-parse-subtrees 'all)))
+
+(defun add-new-subsection (section subtitle content)
+  (save-excursion
+    (goto-char 0)
+    (re-search-forward (s-lex-format "^* ${section}"))
+    (org-insert-subheading (point))
+    (insert subtitle)
+    (org-newline-and-indent)
+    (insert content)
+    (org-id-get-create)))
+
+#+end_src
+
+#+RESULTS:
+: add-new-subsection
+
+
+#+begin_src emacs-lisp
+(defun cthulhu-new-thing-and-make-link (type)
+  (interactive "P")
+  (let* ((type (if (not type) (completing-read "Sélection ?" (get-document-sections))
+		 type))
+	 (thing (read-from-minibuffer (s-lex-format "${type} à ajouter ?")))
+	 (desc (read-from-minibuffer "Description"))
+	 (id (add-new-subsection type thing desc)))
+    (org-insert-link nil (concat "id:" id) thing)))
+
+(defun make-adders (default-sections)
+  (--map (let* ((type it)
+                (fun-name (concat "cthulhu-new-" type "-and-make-link")))
+           (defalias (intern fun-name) `(lambda () (interactive) (cthulhu-new-thing-and-make-link ,type))))
+         default-sections))
+
+(make-adders default-sections)
+#+end_src
+
+#+RESULTS:
+| cthulhu-new-Objets-and-make-link | cthulhu-new-Personnages-and-make-link | cthulhu-new-Monstres-and-make-link | cthulhu-new-Lieux-and-make-link | cthulhu-new-Événements-and-make-link | cthulhu-new-Documentation-and-make-link |
 
 * Manipulation d'un personnage
 ** Récupérer la section de ses tables 
@@ -88,7 +144,7 @@
 #+end_src
 
 #+RESULTS:
-| headline | (:raw-value Tables :begin 13178 :end 16164 :pre-blank 0 :contents-begin 13189 :contents-end 16164 :level 3 :priority nil :tags nil :todo-keyword nil :todo-type nil :post-blank 0 :footnote-section-p nil :archivedp nil :commentedp nil :post-affiliated 13178 :title (Tables) :parent (headline (:raw-value Bobby Watson : un fameux concierge :begin 12682 :end 16165 :pre-blank 0 :contents-begin 12747 :contents-end 16164 :level 2 :priority nil :tags nil :todo-keyword nil :todo-type nil :post-blank 1 :footnote-section-p nil :archivedp nil :commentedp nil :post-affiliated 12682 :title (Bobby Watson : un fameux concierge) :parent (headline (:raw-value Personnages tests :begin 12604 :end 19322 :pre-blank 0 :contents-begin 12682 :contents-end 19321 :level 1 :priority nil :tags (personnage) :todo-keyword nil :todo-type nil :post-blank 1 :footnote-section-p nil :archivedp nil :commentedp nil :post-affiliated 12604 :title (Personnages tests) :parent (org-data nil (section (:begin 2 :end 132 :contents-begin 2 :contents-end 131 :post-blank 1 :post-affiliated 2 :parent #5) (src-block (:language emacs-lisp :switches nil :parameters :tangle org-cthulhu.el :begin 2 :end 111 :number-lines nil :preserve-indent nil :retain-labels t :use-labels t :label-fmt nil :value (require 'cl-lib) |
+| headline | (:raw-value Tables :begin 20478 :end 23200 :pre-blank 0 :contents-begin 20489 :contents-end 23200 :level 3 :priority nil :tags nil :todo-keyword nil :todo-type nil :post-blank 0 :footnote-section-p nil :archivedp nil :commentedp nil :post-affiliated 20478 :title (Tables) :parent (headline (:raw-value La goule :begin 20038 :end 23200 :pre-blank 0 :contents-begin 20050 :contents-end 23200 :level 2 :priority nil :tags nil :todo-keyword nil :todo-type nil :post-blank 0 :footnote-section-p nil :archivedp nil :commentedp nil :post-affiliated 20038 :title (La goule) :parent (headline (:raw-value Monstres tests :begin 19960 :end 23202 :pre-blank 0 :contents-begin 20038 :contents-end 23200 :level 1 :priority nil :tags (personnage) :todo-keyword nil :todo-type nil :post-blank 2 :footnote-section-p nil :archivedp nil :commentedp nil :post-affiliated 19960 :title (Monstres tests) :parent (org-data nil (section (:begin 2 :end 132 :contents-begin 2 :contents-end 131 :post-blank 1 :post-affiliated 2 :parent #5) (src-block (:language emacs-lisp :switches nil :parameters :tangle org-cthulhu.el :begin 2 :end 111 :number-lines nil :preserve-indent nil :retain-labels t :use-labels t :label-fmt nil :value (require 'cl-lib) |
 
 # #+begin_src emacs-lisp
 # ;; Récupérer les tables du personnage sélectionné dans la liste. Oh tiens : =)
@@ -309,32 +365,13 @@ Page 35 manuel du gardien.
          (out (roll-success roll carac)))
     (message (format "%d [%d, %d, %d] : %s" roll carac (majeur carac) (extreme carac) (get-success out)))))
 
-(select-roll-character-carac)
+;; (select-roll-character-carac)
 #+end_src
 
 #+RESULTS:
-: 52 [35, 17, 7] : Échec
-
-
-#+begin_src emacs-lisp
-(defun my-test (&optional arg arg2)
-  (interactive (list (if current-prefix-arg
-                         (read-from-minibuffer "MyPrompt: ")
-                       nil)))
-  (if arg
-      (message arg2)
-    (message "NO ARG")))
-
-#+end_src
-
-#+RESULTS:
-: my-test
-
-
+: 57 [90, 45, 18] : Réussite normale
 
 ** Tests opposés
-
-
 
 #+begin_src emacs-lisp
 (defun cthulhu-test-opposé (&optional success1)
@@ -364,7 +401,6 @@ Page 35 manuel du gardien.
 #+end_src
 
 #+RESULTS:
-: Pas de succès
 
 * Gestion des personnages
 ** Initialiser les caractéristiques dérivées

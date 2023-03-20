@@ -1,0 +1,63 @@
+#+title: Scenario name
+
+* COMMENT Remarques
+
+Il est possible d'intégrer ce mode avec org-roam, en ajoutant des lignes du type :
+
+#+begin_src org
+:PROPERTIES:
+:ID:       32d875eb-4d02-48fb-bf3a-482a2ca8a7c4
+:END:
+#+title: Scenario name 
+#+filetags: scénario cthulhu localgraph
+#+end_src
+
+* Objets                                                              :objet:
+* Personnages (joueurs)                                          :personnage:
+** Joueur 1
+Insérer le template du joueur 1.
+** le lord
+:PROPERTIES:
+:ID:       81a8c429-5dc6-4a60-9a05-acd5aac64888
+:END:
+à faire
+
+* Monstres                                                       :personnage:
+** Monstre 1
+Insérer le template du monstre
+
+Il possède le [[objet brillant]], et aussi une grosse [[épée]] et un [[id:36920c7a-92c6-4244-93fd-86de598b08fe][mask]] et un gros manche [[id:17cf3552-fa9d-46f5-bbee-be635d74ab78][baton]] aunirte
+
+** la bete
+:PROPERTIES:
+:ID:       8d634e77-c7c8-462e-8c82-17a169b50ae8
+:END:
+ dégueue
+
+* Lieux                                                                :lieu:
+** Lieu 1
+
+** la cave
+:PROPERTIES:
+:ID:       286e0ef4-8804-46bb-a2bf-ef89b7eaa7a5
+:END:
+froide
+
+[[id:286e0ef4-8804-46bb-a2bf-ef89b7eaa7a5][la cave]] c'est là que se trouve [[id:8d634e77-c7c8-462e-8c82-17a169b50ae8][la bete]] aienrst.
+
+Lorsque [[id:81a8c429-5dc6-4a60-9a05-acd5aac64888][le lord]] rentre en guerre, tout va pour le plus mal [[id:f66915d9-2f42-4dbc-87fa-4b35dce91dd9][le début]] aruet
+
+
+* Événements                                                      :événement:
+** Début du scénario
+** Événement 1
+** Conclusion
+
+** le début
+:PROPERTIES:
+:ID:       f66915d9-2f42-4dbc-87fa-4b35dce91dd9
+:END:
+tranquille
+
+* Documentation
+
