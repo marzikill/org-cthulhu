@@ -15,19 +15,27 @@
 ** Gestion de l'inventaire d'un personnage
 
 - [ ] obtenir la liste des objets
-- [ ] ajouter un objet
+- [X] ajouter un objet
 - [ ] retirer un objet
 - [ ] transférer un objet
 
 ** Système de jeu 
 
-- [ ] panne pour arme
+NE PAS IMPLÉMENTER DE SYSTÈME POUR LES ROLLS.
+Implémenter un système pour demander quels rolls faire (les rolls c'est ça qui est drôle...).
+
+
 - [ ] gestion des caractéristiques modifiables :
-  - système de santé 
-  - santé mentale
-  - chance 
-- [ ] gestion des états d'un personnage (folie, nombre de round, etc)
-- [ ] gestion des combats
+  - [ ] santé mentale : folie temporaire/permanente etc
+  - [ ] chance 
+- [-] gestion des combats
+  - [ ] initialiser un tableau de combat
+  - [X] attaques au corps à corps en combat
+  - [ ] nouveau round et reset de certaines cases
+  - [ ] attaques à distance
+    - [ ] dégâts
+    - [ ] panne pour arme
+  - [ ] folie dans un combat
 
 ** Améliorations diverses
 
@@ -128,11 +136,13 @@
 ** Récupérer la section de ses tables 
 
 #+begin_src emacs-lisp :tangle org-cthulhu.el 
-(defun select-character ()
+(defun select-character (&optional personnage-selectionné)
   "Renvoie _un_ personnage du buffer courant"
   (let* ((personnages-liste (--filter (eq (org-ml-get-type it) 'headline)
-				(get-tagged-subtree '("personnage"))))
-         (personnage-selectionné (completing-read "Sélectionner un personnage: " (get-characters-name) nil t)))
+				      (get-tagged-subtree '("personnage"))))
+         (personnage-selectionné (if (not personnage-selectionné)
+                                     (completing-read "Sélectionner un personnage: " (get-characters-name) nil t)
+                                   personnage-selectionné)))
     (car (--filter (string= (org-ml-get-property :raw-value it) personnage-selectionné) personnages-liste))))
 
 ;; On peut probablement utiliser org-ml-match...
@@ -202,13 +212,24 @@
 : get-character-info
 
 #+begin_src emacs-lisp :tangle org-cthulhu.el
+(defun get-carac (personnage carac)
+  (let* ((personnage-info  (get-character-info personnage)))
+    (assoc carac personnage-info)))
+
+(defun carac-value (carac)
+  (string-to-number (cdr carac)))
+
+(defun carac-to-string (carac)
+  (let ((carac-name (car carac))
+	(carac-value (string-to-number (cdr carac))))
+  (substring-no-properties (format "%s : %s [maj. %s/ext. %s]" carac-name carac-value (majeur carac-value) (extreme carac-value)))))
+
 (defun get-carac-value (personnage carac)
   (let* ((personnage-info  (get-character-info personnage))
          (value (cdr (assoc carac personnage-info))))
     (if (string= carac "-- Impact")
         (roll-from-string value)
     (string-to-number value))))
-
 
 (defun select-get-carac (personnage)
   (get-carac-value personnage
@@ -314,8 +335,8 @@ Page 35 manuel du gardien.
     ("Réussite extrême" . 1)
     ("Réussite critique" . 0)))
 
-(defun ask-success-type ()
-  (cdr (assoc (completing-read "Type de réussite" success-types) success-types)))
+(defun ask-success-type (&optional prompt)
+  (cdr (assoc (completing-read (concat "Type de réussite" prompt) success-types) success-types)))
 
 (defun get-success (out)
   (car (rassq out success-types)))
@@ -371,15 +392,16 @@ Page 35 manuel du gardien.
          (out (roll-success roll carac)))
     (message (format "%d [%d, %d, %d] : %s" roll carac (majeur carac) (extreme carac) (get-success out)))))
 
-;; (select-roll-character-carac)
+(select-roll-character-carac)
 #+end_src
 
 #+RESULTS:
-: select-roll-character-carac
+: 43 [90, 45, 18] : Réussite majeure
 
 ** Tests opposés
 
 #+begin_src emacs-lisp
+
 (defun cthulhu-test-opposé (&optional success1)
   (interactive "P")
   (let* ((perso1 (select-character))
@@ -410,6 +432,7 @@ Page 35 manuel du gardien.
 : Succès de Bobby Watson : un fameux concierge (Réussite extrême vs Échec)
 
 ** Armes
+*** Représentation des armes 
 
 #+begin_src emacs-lisp
 (defvar weapons-list 
@@ -439,42 +462,75 @@ sinon. "
 	(empalement (nth 3 weapon)))
     (format "%s (%s) %s" name degats (if empalement "[E]" " "))))
 
-(weapon-to-string (assoc (completing-read "Arme" weapons-list) weapons-list))
+(defun select-weapon ()
+  (assoc (completing-read "Arme" weapons-list) weapons-list))
+
+;; (weapon-to-string (select-weapon))
 #+end_src
 
 #+RESULTS:
 : IMI Desert Eagle (3D10+2D6+3+Imp/2) [E]
 
-#+begin_src emacs-lisp
-(defun weapon-get-damage-from-string (weapon)
-  (let* ((damages (nth 2 weapon))
-         (rolls (cl-loop while (string-match "\\([[:digit:]]\\)D\\([[:digit:]]\\{0,2\\}\\)\\+\?" damages)
-			 collect (list (string-to-number (match-string 1 damages))
-                                       (string-to-number (match-string 2 damages)))
-                         ;; sum (apply #'+ (roll (string-to-number (match-string 1 damages))
-                         ;;                      (string-to-number (match-string 2 damages))))
-                         do (setq damages (replace-match "" nil nil damages))))
-         (cte (if (string-match "\\([[:digit:]]\\)" damages)
-                  (string-to-number (match-string 0 damages))))
-         (impact (string-match "Imp" damages)))
-    (list rolls cte impact)))
-#+end_src
+*** Roll weapon
+
+# Pourquoi pas mais peu élégant
+# #+begin_src emacs-lisp
+# (defun weapon-get-damage-from-string (weapon)
+#   (let* ((damages (nth 2 weapon))
+#          (rolls (cl-loop while (string-match "\\([[:digit:]]\\)D\\([[:digit:]]\\{0,2\\}\\)\\+\?" damages)
+# 			 collect (list (string-to-number (match-string 1 damages))
+#                                        (string-to-number (match-string 2 damages)))
+#                          ;; sum (apply #'+ (roll (string-to-number (match-string 1 damages))
+#                          ;;                      (string-to-number (match-string 2 damages))))
+#                          do (setq damages (replace-match "" nil nil damages))))
+#          (cte (if (string-match "\\([[:digit:]]\\)" damages)
+#                   (string-to-number (match-string 0 damages))))
+#          (impact (string-match "Imp" damages)))
+#     (list rolls cte impact)))
+# #+end_src
 
 
 #+begin_src emacs-lisp
 (defun roll-from-string (str)
   (cond
    ((string-match "\\([[:digit:]]\\)D\\([[:digit:]]\\{0,2\\}\\)\\+\?" str) (apply #'+ (roll (string-to-number (match-string 1 str))
-                                                                                           (string-to-number (match-string 2 str)))) )
+                                                                                            (string-to-number (match-string 2 str)))) )
    (t (string-to-number str))))
 
-(defun weapon-get-damage-from-string (weapon)
-  (let ((specs (split-string (nth 2 weapon) "+")))
-    (--map (roll-from-string it) specs)))
+(defun roll-max-from-string (str)
+  (cond
+   ((string-match "\\([[:digit:]]\\)D\\([[:digit:]]\\{0,2\\}\\)\\+\?" str) (+ (* (string-to-number (match-string 1 str))
+                                                                                 (string-to-number (match-string 2 str)))) )
+   (t (string-to-number str))))
+
+(defun weapon-get-damage (weapon imp)
+  (let ((rolls (split-string (nth 2 weapon) "+"))
+        (imp-damage (roll-from-string imp)))
+    (apply #'+
+           (--map (if (string-match "Imp" it)
+                      (string-to-number (calc-eval (replace-match (number-to-string imp-damage) nil nil it)))
+                    (roll-from-string it))
+                  rolls))))
+
+(defun weapon-get-max-damage (weapon imp)
+  (let ((rolls (split-string (nth 2 weapon) "+"))
+        (imp-damage (roll-max-from-string imp)))
+    (apply #'+
+           (--map (if (string-match "Imp" it)
+                      (string-to-number (calc-eval (replace-match (number-to-string imp-damage) nil nil it)))
+                    (roll-max-from-string it))
+                  rolls))))
+
+(defun weapon-get-impalement-damage (weapon imp)
+  (+ (weapon-get-damage weapon imp)
+     (weapon-get-max-damage weapon imp)))
+
+;; (weapon-get-max-damage-from-string (select-weapon) "1D5")
 #+end_src
 
 #+RESULTS:
-: weapon-get-damage-from-string
+: 47
+
 
 * Gestion des personnages
 ** Initialiser les caractéristiques dérivées
@@ -534,6 +590,145 @@ sinon. "
   - empalement
 - ~cthulhu-fight-next-round~
     
+#+begin_src emacs-lisp
+(defvar combat-mode-rows
+  '("Points de vie"
+    "Protection"
+    "Attaques"
+    "Coups rendus"
+    "Blessure grave"
+    "Mourant"
+    "Inconscient"
+    "Folie"))         
+
+(defvar combat-options
+  '("Esquiver"
+    "Rendre les coups"
+    "Manœuvre"))
+
+(defun cthulhu-fight-get-current-fighters ()
+  (let* ((table (org-ml-parse-this-table-row))
+         (row (org-table-current-line))
+         (col (org-table-current-column))
+         (maxcol (length (org-ml-get-children table)))
+         (maxrow (1+ (length combat-mode-rows))))
+    (save-excursion 
+      (org-table-goto-column 1)
+      (org-table-goto-line 1)
+      (cl-loop for i from 2 to maxcol
+               do (org-table-goto-column i)
+               collect (string-trim (substring-no-properties (org-table-get-field)))))))
+#+end_src
+
+
+** Modification des états de combat
+
+#+begin_src emacs-lisp
+(defun cthulhu-fight-inflict-major-wound (victime-name)
+  "Ajoute un marqueur de blessure majeure sur la victime-name"
+  (let* ((party (cthulhu-fight-get-current-fighters))
+         (col (+ 2 (position victime-name party :test #'string=)))
+         (row (+ 2 (position "Blessure grave" combat-mode-rows :test #'string=))))
+    (save-excursion
+      (org-table-goto-line row)
+      (org-table-goto-column col)
+      (org-table-blank-field)
+      (insert "t")
+      (org-table-align))))
+
+(defun cthulhu-fight-fight-back-dodge (victime-name)
+  "Incrémente le compteur de ripostes au CaC de la victime-name"
+  (let* ((party (cthulhu-fight-get-current-fighters))
+         (col (+ 2 (position victime-name party :test #'string=)))
+         (row (+ 2 (position "Coups rendus" combat-mode-rows :test #'string=))))
+    (save-excursion
+      (org-table-goto-line row)
+      (org-table-goto-column col)
+      (insert (number-to-string (1+ (string-to-number (org-table-blank-field)))))
+      (org-table-align))))
+#+end_src
+
+#+RESULTS:
+: cthulhu-fight-fight-back-dodge
+
+
+
+** Infliger des dommages à une cible
+
+On peut améliorer les prompts
+
+#+begin_src emacs-lisp
+;; Remplacer "18" par : (get-carac-value victime "Points de vie") 
+;; Une vie de -100 est un état mort
+(defun cthulhu-fight-inflict-damage (victime-name)
+  "Met à jour les pdvs et les états de la victime-name en lui infligeant un montant de dégâts"
+  (let* ((party (cthulhu-fight-get-current-fighters))
+         ;; (victime-name (completing-read "Cible de l'attaque : " party))
+         (col (+ 2 (position victime-name party :test #'string=)))
+         (row (+ 2 (position "Points de vie" combat-mode-rows :test #'string=)))
+         (degats (eval-minibuffer "Dégâts infligés : " )))
+    (save-excursion
+      (org-table-goto-line row)
+      (org-table-goto-column col)
+      (let* ((current-health (string-to-number (org-table-blank-field)))
+             (new-health (- current-health degats)))
+        (cond
+         ((> degats (get-carac-value (select-character victime-name) "Points de vie"))
+          (setq new-health -100))
+         ((> degats (/ (get-carac-value (select-character victime-name) "Points de vie") 2))
+          (cthulhu-fight-inflict-major-wound victime-name)))
+        (insert (number-to-string new-health)))
+      (org-table-align))))
+#+end_src
+
+#+RESULTS:
+: cthulhu-fight-inflict-damage
+
+#+end_src
+
+
+** Attaquer une cible
+
+#+begin_src emacs-lisp
+(defun cthulhu-fight-attack-brawl (&optional victime)
+  (let* ((attaquant-name (string-trim (substring-no-properties (org-table-get-field))))
+         (victime-name (completing-read "Choix de la victime ? " (cthulhu-fight-get-current-fighters)))
+         (def (completing-read "Choix de la riposte ? " combat-options))
+         (carac "Corps à corps")
+         (acarac (get-carac (select-character attaquant-name) carac))
+         (vcarac (get-carac (select-character victime-name) carac))
+         ;; (acarac (get-carac-value attaquant "Corps à corps"))
+         ;; (vcarac (get-carac-value victime "Corps à corps"))
+         )
+    (cond
+     ((string= def "Esquiver") (dodge-fun
+                                victime-name
+                                (roll-success (ask-roll-result attaquant-name acarac) (carac-value acarac))
+                                (roll-success (ask-roll-result victime-name vcarac) (carac-value vcarac))
+                                ))
+     ((string= def "Rendre les coups") (fight-back-fun
+                                        victime-name
+                                        (roll-success (ask-roll-result attaquant-name acarac) (carac-value acarac))
+                                        (roll-success (ask-roll-result victime-name vcarac) (carac-value vcarac))))
+     (t nil))))
+
+(defun ask-roll-result (perso-name carac)
+  (eval-minibuffer (format "Lancer pour %s. %s "
+			   perso-name
+			   (carac-to-string carac))))
+
+(defun dodge-fun (victime-name asuccess vsuccess)
+  (if (< asuccess vsuccess) (cthulhu-fight-inflict-damage victime-name))
+  (cthulhu-fight-fight-back-dodge victime-name))
+
+(defun fight-back-fun (victime-name asuccess vsuccess)
+  (if (<= asuccess vsuccess) (cthulhu-fight-inflict-damage victime-name))
+  (cthulhu-fight-fight-back-dodge victime-name))
+#+end_src
+
+#+RESULTS:
+: fight-back-fun
+
 * Personnages tests                                              :personnage:
 ** Bobby Watson : un fameux concierge                           
 *** En bref 
