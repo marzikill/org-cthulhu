@@ -6,12 +6,7 @@ TODO :
   - gestion des caractéristiques modifiables : santé, santé mentale, chance etc. 
   - gestion des états d'un personnage (folie, nombre de round, etc)
 - aide à la rédaction :
-  - nouvel objet
-  - nouveau personnage
-    - joueur
-    - monstre
-  - nouveau lieu
-  - nouvel événement
+  - lors de la création d'un nouveau X : proposer un template pour l'entrée de type X.
   - insérer un test de caractéristique
   - nouvelle scène (participants, dex, ordre de passage)
 

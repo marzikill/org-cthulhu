@@ -1,4 +1,3 @@
-
 #+begin_src emacs-lisp :tangle org-cthulhu.el
 (require 'cl-lib)
 (require 'dash)
@@ -9,10 +8,9 @@
 : org-ml
 
 * TODO Pistes d'amélioration
-** Ajout d'éléments
 ** Manipulation des personnages
 
-- [ ] ~cthulhu-select-set-carac~ devrait indiquer dans le minibuffer ce qu'il a fait
+- [X] ~cthulhu-select-set-carac~ devrait indiquer dans le minibuffer ce qu'il a fait
 
 ** Gestion de l'inventaire d'un personnage
 
@@ -33,14 +31,14 @@
 
 ** Améliorations diverses
 
-- [ ]Détecter les personnages (tag "personnage") dans un entête de niveau >= 2
+- [ ] Détecter les personnages (tag "personnage") dans un entête de niveau >= 2
 
 ** Latex
 
 - [ ] trouver quoi mettre au recto du lifetracker
   un récapitulatif de certaines règles ?
-
-
+  - combat
+  - dé malus/bonus, tests de santé mentale etc
 
 * Import des personnages 
 
@@ -48,7 +46,7 @@
 (defun get-tagged-subtree (taglist)
   "Détermine la liste les enfants des nœuds dont la liste des tags est taglist "
   (apply #'-concat (-map #'org-ml-get-children 
-  (org-ml-match '((:tags taglist)) (org-ml-parse-this-buffer)))))
+ (--filter (eq (org-ml-get-type it) 'headline) (org-ml-match '((:tags taglist)) (org-ml-parse-subtrees 'all))))))
 #+end_src
 
 #+RESULTS:
@@ -56,7 +54,10 @@
 
 #+begin_src emacs-lisp :tangle org-cthulhu.el
 (defun get-characters-name ()
-  (--map (org-ml-get-property :raw-value it) (get-tagged-subtree '("personnage"))))
+  (let ((section-list (--filter (eq (org-ml-get-type it) 'headline)
+				(get-tagged-subtree '("personnage")))))
+    (--map (org-ml-get-property :raw-value it) section-list)))
+
 
 (defun get-name (personnage)
   (org-ml-get-property :raw-value personnage))
@@ -71,7 +72,6 @@
 #+end_src
 
 #+RESULTS:
-| Bobby Watson : un fameux concierge | Ybbo Nostaw : cambrioleur | La goule |
 
 * Ajout de sous-sections
 
@@ -96,7 +96,6 @@
     (org-newline-and-indent)
     (insert content)
     (org-id-get-create)))
-
 #+end_src
 
 #+RESULTS:
@@ -131,7 +130,8 @@
 #+begin_src emacs-lisp :tangle org-cthulhu.el 
 (defun select-character ()
   "Renvoie _un_ personnage du buffer courant"
-  (let* ((personnages-liste (get-tagged-subtree '("personnage")))
+  (let* ((personnages-liste (--filter (eq (org-ml-get-type it) 'headline)
+				(get-tagged-subtree '("personnage"))))
          (personnage-selectionné (completing-read "Sélectionner un personnage: " (get-characters-name) nil t)))
     (car (--filter (string= (org-ml-get-property :raw-value it) personnage-selectionné) personnages-liste))))
 
@@ -144,7 +144,7 @@
 #+end_src
 
 #+RESULTS:
-| headline | (:raw-value Tables :begin 20478 :end 23200 :pre-blank 0 :contents-begin 20489 :contents-end 23200 :level 3 :priority nil :tags nil :todo-keyword nil :todo-type nil :post-blank 0 :footnote-section-p nil :archivedp nil :commentedp nil :post-affiliated 20478 :title (Tables) :parent (headline (:raw-value La goule :begin 20038 :end 23200 :pre-blank 0 :contents-begin 20050 :contents-end 23200 :level 2 :priority nil :tags nil :todo-keyword nil :todo-type nil :post-blank 0 :footnote-section-p nil :archivedp nil :commentedp nil :post-affiliated 20038 :title (La goule) :parent (headline (:raw-value Monstres tests :begin 19960 :end 23202 :pre-blank 0 :contents-begin 20038 :contents-end 23200 :level 1 :priority nil :tags (personnage) :todo-keyword nil :todo-type nil :post-blank 2 :footnote-section-p nil :archivedp nil :commentedp nil :post-affiliated 19960 :title (Monstres tests) :parent (org-data nil (section (:begin 2 :end 132 :contents-begin 2 :contents-end 131 :post-blank 1 :post-affiliated 2 :parent #5) (src-block (:language emacs-lisp :switches nil :parameters :tangle org-cthulhu.el :begin 2 :end 111 :number-lines nil :preserve-indent nil :retain-labels t :use-labels t :label-fmt nil :value (require 'cl-lib) |
+| headline | (:raw-value Tables :begin 15931 :end 18917 :pre-blank 0 :contents-begin 15942 :contents-end 18917 :level 3 :priority nil :tags nil :todo-keyword nil :todo-type nil :post-blank 0 :footnote-section-p nil :archivedp nil :commentedp nil :post-affiliated 15931 :title (Tables) :parent (headline (:raw-value Bobby Watson : un fameux concierge :begin 15435 :end 18918 :pre-blank 0 :contents-begin 15500 :contents-end 18917 :level 2 :priority nil :tags nil :todo-keyword nil :todo-type nil :post-blank 1 :footnote-section-p nil :archivedp nil :commentedp nil :post-affiliated 15435 :title (Bobby Watson : un fameux concierge) :parent (headline (:raw-value Personnages tests :begin 15357 :end 22075 :pre-blank 0 :contents-begin 15435 :contents-end 22074 :level 1 :priority nil :tags (personnage) :todo-keyword nil :todo-type nil :post-blank 1 :footnote-section-p nil :archivedp nil :commentedp nil :post-affiliated 15357 :title (Personnages tests) :parent (org-data nil (headline (:raw-value Pistes d'amélioration :begin 131 :end 938 :pre-blank 0 :contents-begin 160 :contents-end 937 :level 1 :priority nil :tags nil :todo-keyword TODO :todo-type todo :post-blank 1 :footnote-section-p nil :archivedp nil :commentedp nil :post-affiliated 131 :title (Pistes d'amélioration) :parent #5) (headline (:raw-value Manipulation des personnages :begin 160 :end 279 :pre-blank 1 :contents-begin 193 :contents-end 278 :level 2 :priority nil :tags nil :todo-keyword nil :todo-type nil :post-blank 1 :footnote-section-p nil :archivedp nil :commentedp nil :post-affiliated 160 :title (Manipulation des personnages) :parent #6) (section (:begin 193 :end 279 :contents-begin 193 :contents-end 278 :post-blank 1 :post-affiliated 193 :parent #7) (plain-list (:type unordered :begin 193 :end 278 :contents-begin 193 :contents-end 278 :structure ((193 0 -  nil [ ] nil 278)) :post-blank 0 :post-affiliated 193 :parent #8) (item (:bullet -  :begin 193 :end 278 :contents-begin 199 :contents-end 278 :checkbox off :counter nil :structure ((193 0 -  nil [ ] nil 278)) :pre-blank 0 :post-blank 0 :post-affiliated 193 :tag nil :parent #9) (paragraph (:begin 199 :end 278 :contents-begin 199 :contents-end 278 :post-blank 0 :post-affiliated 199 :parent #10) (code (:value cthulhu-select-set-carac :begin 199 :end 226 :post-blank 1 :parent #11)) devrait indiquer dans le minibuffer ce qu'il a fait |
 
 # #+begin_src emacs-lisp
 # ;; Récupérer les tables du personnage sélectionné dans la liste. Oh tiens : =)
@@ -203,8 +203,12 @@
 
 #+begin_src emacs-lisp :tangle org-cthulhu.el
 (defun get-carac-value (personnage carac)
-  (let ((personnage-info  (get-character-info personnage)))
-    (string-to-number (cdr (assoc carac personnage-info)))))
+  (let* ((personnage-info  (get-character-info personnage))
+         (value (cdr (assoc carac personnage-info))))
+    (if (string= carac "-- Impact")
+        (roll-from-string value)
+    (string-to-number value))))
+
 
 (defun select-get-carac (personnage)
   (get-carac-value personnage
@@ -233,7 +237,8 @@
       (goto-char beg)
       (re-search-forward (s-lex-format "^.*${carac}.*$"))
       (replace-match new-line)
-      (org-table-align))))
+      (org-table-align))
+  (number-to-string val)))
 ;; (replace-regexp-in-region (s-lex-format "^.*${carac}.*$") new-line beg end)))
 
 (defun augmente-carac (old-carac)
@@ -244,8 +249,9 @@
   (let* ((personnage (select-character))
          (carac (completing-read "Sélectionner une  caractéristique: " (get-character-info personnage) nil t))
          (new-value (string-to-number (read-from-minibuffer "Valeur de la caractéristique ? ")))
-         (calc-new-carac (lambda (old-carac) new-value)))
-    (set-carac personnage carac calc-new-carac)))
+         (calc-new-carac (lambda (old-carac) new-value))
+         (old-value (set-carac personnage carac calc-new-carac)))
+    (message (format "%s : %s -> %s" carac old-value new-value))))
 #+end_src
 
 #+RESULTS:
@@ -369,7 +375,7 @@ Page 35 manuel du gardien.
 #+end_src
 
 #+RESULTS:
-: 57 [90, 45, 18] : Réussite normale
+: select-roll-character-carac
 
 ** Tests opposés
 
@@ -401,6 +407,74 @@ Page 35 manuel du gardien.
 #+end_src
 
 #+RESULTS:
+: Succès de Bobby Watson : un fameux concierge (Réussite extrême vs Échec)
+
+** Armes
+
+#+begin_src emacs-lisp
+(defvar weapons-list 
+  '(("Arbalète" "Arcs" "1D8+2" t 50 0.5 nil 96)
+    ("Hache" "Haches" "1D8+2" t nil 1 nil nil)
+    ("Luger" "Armes de poing" "1D10" t 15 1 8 99)
+    ("IMI Desert Eagle" "Armes de poing" "3D10+2D6+3+Imp/2" t 15 1 7 94)
+    ("Torche" "Corps à corps" "1D6+Feu" nil 1 nil nil)
+    ("Automatique cal. 38" "Armes de poing" "1D10" t 15 1 '(6 5) 99))
+  "Nom Compétence Dégats Empalement Portée Cadence Capacité Panne")
+
+(defun failurep (weapon roll)
+  (> (nth 8 weaon) roll))
+
+(defun range-weaponp (weapon)
+  "Renvoie la portée d'une arme si celle-ci est une arme à distance,
+sinon. "
+  (nth 5 weapon))
+
+(defun impale-weaponp (weapon)
+  "Détermine si l'arme weapon est capable de dégâts d'empalement."
+  (nth 4 weapon))
+
+(defun weapon-to-string (weapon)
+  (let ((name (nth 0 weapon))
+	(degats (nth 2 weapon))
+	(empalement (nth 3 weapon)))
+    (format "%s (%s) %s" name degats (if empalement "[E]" " "))))
+
+(weapon-to-string (assoc (completing-read "Arme" weapons-list) weapons-list))
+#+end_src
+
+#+RESULTS:
+: IMI Desert Eagle (3D10+2D6+3+Imp/2) [E]
+
+#+begin_src emacs-lisp
+(defun weapon-get-damage-from-string (weapon)
+  (let* ((damages (nth 2 weapon))
+         (rolls (cl-loop while (string-match "\\([[:digit:]]\\)D\\([[:digit:]]\\{0,2\\}\\)\\+\?" damages)
+			 collect (list (string-to-number (match-string 1 damages))
+                                       (string-to-number (match-string 2 damages)))
+                         ;; sum (apply #'+ (roll (string-to-number (match-string 1 damages))
+                         ;;                      (string-to-number (match-string 2 damages))))
+                         do (setq damages (replace-match "" nil nil damages))))
+         (cte (if (string-match "\\([[:digit:]]\\)" damages)
+                  (string-to-number (match-string 0 damages))))
+         (impact (string-match "Imp" damages)))
+    (list rolls cte impact)))
+#+end_src
+
+
+#+begin_src emacs-lisp
+(defun roll-from-string (str)
+  (cond
+   ((string-match "\\([[:digit:]]\\)D\\([[:digit:]]\\{0,2\\}\\)\\+\?" str) (apply #'+ (roll (string-to-number (match-string 1 str))
+                                                                                           (string-to-number (match-string 2 str)))) )
+   (t (string-to-number str))))
+
+(defun weapon-get-damage-from-string (weapon)
+  (let ((specs (split-string (nth 2 weapon) "+")))
+    (--map (roll-from-string it) specs)))
+#+end_src
+
+#+RESULTS:
+: weapon-get-damage-from-string
 
 * Gestion des personnages
 ** Initialiser les caractéristiques dérivées
@@ -445,6 +519,21 @@ Page 35 manuel du gardien.
 #+RESULTS:
 : cthulhu-select-init
 
+* TODO Gestion d'un combat
+
+- classer les personnages par ordre décroissant de dextérité
+  - ajouter un personnage qui rejoint la mêlée
+- choisir une arme ?
+- corps à corps :
+  - règle du sous-nombre : nombre d'attaques par tour !
+  - ~cthulhu-fight-fight-back perso1 perso2~ la cible rend les coups
+  - ~cthulhu-fight-dodge perso1 perso2~ la cible esquive
+  - ~cthulhu-fight-damage weapon~ 
+  - ~cthulhu-fight-manoeuvre~
+- dégâts :
+  - empalement
+- ~cthulhu-fight-next-round~
+    
 * Personnages tests                                              :personnage:
 ** Bobby Watson : un fameux concierge                           
 *** En bref 
@@ -481,7 +570,7 @@ Particularités :
 | DEX | 70 | 35 | 14 |
 | INT | 50 | 25 | 10 |
 | APP | 50 | 25 | 10 |
-| POU | 80 | 30 | 12 |
+| POU | 55 | 27 | 11 |
 | EDU | 10 |  5 |  2 |
 | AGE | 35 |    |    |
 #+TBLFM: $3=round($2/2)::$4=round($2/5)

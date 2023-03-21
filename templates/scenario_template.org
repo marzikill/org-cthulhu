@@ -47,8 +47,8 @@ froide
 
 Lorsque [[id:81a8c429-5dc6-4a60-9a05-acd5aac64888][le lord]] rentre en guerre, tout va pour le plus mal [[id:f66915d9-2f42-4dbc-87fa-4b35dce91dd9][le début]] aruet
 
-
 * Événements                                                      :événement:
+
 ** Début du scénario
 ** Événement 1
 ** Conclusion
@@ -58,6 +58,25 @@ Lorsque [[id:81a8c429-5dc6-4a60-9a05-acd5aac64888][le lord]] rentre en guerre, t
 :ID:       f66915d9-2f42-4dbc-87fa-4b35dce91dd9
 :END:
 tranquille
+
+** combat 1
+:PROPERTIES:
+:ID:       94854d62-ca6a-4a36-9488-55d4734062cb
+:END:
+
+|----------------+---------------+---------------+-----------+-----------------|
+| Personnages    | Le dilettante | L'abomination | Le soldat | L'archéologiste |
+|----------------+---------------+---------------+-----------+-----------------|
+| Points de vie  |      10       |      17       |    13     |       12        |
+| Protection     |               |               |           |                 |
+| Attaques       |       1       |       2       |     1     |        1        |
+| Coups rendus   |               |               |           |                 |
+| Blessure grave |               |               |           |                 |
+| Mourant        |               |               |           |                 |
+| Inconscient    |               |               |           |                 |
+| Folie          |               |               |           |                 |
+|----------------+---------------+---------------+-----------+-----------------|
+|                |     <c10>     |     <c10>     |   <c10>   |      <c10>      |
 
 * Documentation
 
