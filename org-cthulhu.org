@@ -46,7 +46,7 @@ Implémenter un système pour demander quels rolls faire (les rolls c'est ça qu
 ** Améliorations diverses
 
 - [ ] Détecter les personnages (tag "personnage") dans un entête de niveau >= 2
-- [ ] améliorer les requêtes à ~get-carac~ : c'est long parce qu'on parse tout le buffer à chaque fois, de multiples fois.
+- [X] améliorer les requêtes à ~get-carac~ : c'est long parce qu'on parse tout le buffer à chaque fois, de multiples fois.
   
 ** Latex
 
@@ -69,10 +69,7 @@ Implémenter un système pour demander quels rolls faire (les rolls c'est ça qu
 
 #+begin_src emacs-lisp :tangle org-cthulhu.el
 (defun get-characters-name ()
-  (let ((section-list (--filter (eq (org-ml-get-type it) 'headline)
-				(get-tagged-subtree '("personnage")))))
-    (--map (org-ml-get-property :raw-value it) section-list)))
-
+  (--map (org-ml-get-property :raw-value it) cthulhu-personnages-liste))
 
 (defun get-name (personnage)
   (org-ml-get-property :raw-value personnage))
@@ -86,7 +83,6 @@ Implémenter un système pour demander quels rolls faire (les rolls c'est ça qu
 ;; (get-name (select-character))
 #+end_src
 
-#+RESULTS:
 
 * Ajout de sous-sections
 
@@ -142,15 +138,30 @@ Implémenter un système pour demander quels rolls faire (les rolls c'est ça qu
 * Manipulation d'un personnage
 ** Récupérer la section de ses tables 
 
+#+begin_src emacs-lisp
+(defvar cthulhu-personnages-liste
+  nil)
+
+(defun cthulhu-personnages-liste-update ()
+  (setq cthulhu-personnages-liste (--filter (eq (org-ml-get-type it) 'headline)
+            (get-tagged-subtree '("personnage")))))
+
+(add-hook 'after-save-hook 'cthulhu-personnages-liste-update)
+
+;; https://github.com/10sr/switch-buffer-functions-el/pull/7
+;;(add-to-list window-buffer-change-functions 'cthulhu-personnages-liste-update)
+#+end_src
+
+#+RESULTS:
+| cthulhu-personnages-liste-update | efs/org-babel-tangle-config | rmail-after-save-hook | latex-auto-save | doom-modeline-update-vcs-text | doom-modeline-update-vcs-icon | doom-modeline-update-buffer-file-name |
+
 #+begin_src emacs-lisp :tangle org-cthulhu.el 
 (defun select-character (&optional personnage-selectionné prompt-info)
   "Renvoie _un_ personnage du buffer courant"
-  (let* ((personnages-liste (--filter (eq (org-ml-get-type it) 'headline)
-				      (get-tagged-subtree '("personnage"))))
-         (personnage-selectionné (if (not personnage-selectionné)
+  (let* ((personnage-selectionné (if (not personnage-selectionné)
                                      (completing-read (concat "Sélectionner un personnage: " prompt-info) (get-characters-name) nil t)
                                    personnage-selectionné)))
-    (car (--filter (string= (org-ml-get-property :raw-value it) personnage-selectionné) personnages-liste))))
+    (car (--filter (string= (org-ml-get-property :raw-value it) personnage-selectionné) cthulhu-personnages-liste))))
 
 ;; On peut probablement utiliser org-ml-match...
 (defun get-tables (personnage)
@@ -251,6 +262,8 @@ Implémenter un système pour demander quels rolls faire (les rolls c'est ça qu
 
 #+RESULTS:
 : select-get-carac
+
+
 
 ** Modifier une caractéristique 
 
