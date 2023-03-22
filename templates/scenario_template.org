@@ -169,6 +169,9 @@ Depuis peu tout votre énervement a disparu. Vous êtes maintenant très excité
 | Estimation   |  5 |  3 |  1 |
 #+TBLFM: $3=round($2/2)::$4=round($2/5)
 
+
+
+
 *** Remarques                                                      :ignore:
 
 #+LATEX: \end{twocols}
@@ -724,15 +727,16 @@ tranquille
 |----------------+---------------+-----------------+---------------+--------------------------+---------------------------------------|
 | Personnages    | Le dilettante | L'ancien soldat | L'archéologue | Le professeur de langues | L'Abomination, Adepte du Pharaon Noir |
 |----------------+---------------+-----------------+---------------+--------------------------+---------------------------------------|
-| Points de vie  |     -100      |       12        |      13       |            12            |                                       |
+| Points de vie  |     -100      |       12        |      13       |            12            |                  -4                   |
 | Protection     |               |                 |               |                          |                                       |
 | Attaques       |       1       |        2        |       1       |            1             |                   1                   |
-| Coups rendus   |       0       |        3        |       0       |            0             |                   3                   |
+| Coups rendus   |       0       |        3        |       0       |            0             |                   4                   |
 | Blessure grave |       t       |        t        |               |                          |                   t                   |
 | Mourant        |               |                 |               |                          |                                       |
 | Inconscient    |               |                 |               |                          |                                       |
 | Folie          |               |                 |               |                          |                                       |
 |----------------+---------------+-----------------+---------------+--------------------------+---------------------------------------|
 |                |     <c10>     |      <c10>      |     <c10>     |          <c10>           |                 <c10>                 |
+
 
 * Documentation

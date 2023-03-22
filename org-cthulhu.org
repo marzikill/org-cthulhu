@@ -26,21 +26,28 @@ Implémenter un système pour demander quels rolls faire (les rolls c'est ça qu
 
 
 - [ ] gestion des caractéristiques modifiables :
+  - [ ] rajouter une section "hidden" aux tables :
+    - santé mentale max, chance max, pdv max etc.
+    - états folies etc 
+    - attaques (défaut 1), coups rendus (défaut 0)
   - [ ] santé mentale : folie temporaire/permanente etc
   - [ ] chance 
 - [-] gestion des combats
-  - [ ] initialiser un tableau de combat
+  - [X] initialiser un tableau de combat
+    - [X] récupérer les attaquants par ordre de DEX
+    - [X] import des compétences intéressante
   - [X] attaques au corps à corps en combat
-  - [ ] nouveau round et reset de certaines cases
+  - [ ] folie dans un combat
+  - [ ] nouveau round et mise à jour de certaines cases
   - [ ] attaques à distance
     - [ ] dégâts
     - [ ] panne pour arme
-  - [ ] folie dans un combat
 
 ** Améliorations diverses
 
 - [ ] Détecter les personnages (tag "personnage") dans un entête de niveau >= 2
-
+- [ ] améliorer les requêtes à ~get-carac~ : c'est long parce qu'on parse tout le buffer à chaque fois, de multiples fois.
+  
 ** Latex
 
 - [ ] trouver quoi mettre au recto du lifetracker
@@ -136,12 +143,12 @@ Implémenter un système pour demander quels rolls faire (les rolls c'est ça qu
 ** Récupérer la section de ses tables 
 
 #+begin_src emacs-lisp :tangle org-cthulhu.el 
-(defun select-character (&optional personnage-selectionné)
+(defun select-character (&optional personnage-selectionné prompt-info)
   "Renvoie _un_ personnage du buffer courant"
   (let* ((personnages-liste (--filter (eq (org-ml-get-type it) 'headline)
 				      (get-tagged-subtree '("personnage"))))
          (personnage-selectionné (if (not personnage-selectionné)
-                                     (completing-read "Sélectionner un personnage: " (get-characters-name) nil t)
+                                     (completing-read (concat "Sélectionner un personnage: " prompt-info) (get-characters-name) nil t)
                                    personnage-selectionné)))
     (car (--filter (string= (org-ml-get-property :raw-value it) personnage-selectionné) personnages-liste))))
 
@@ -150,11 +157,11 @@ Implémenter un système pour demander quels rolls faire (les rolls c'est ça qu
   "Récupère la section des tables d'un personnage donné"
   (car (--filter (string= (org-ml-get-property :raw-value it) "Tables") (org-ml-get-children personnage))))
 
-(get-tables (select-character))
+;; (get-tables (select-character))
 #+end_src
 
 #+RESULTS:
-| headline | (:raw-value Tables :begin 15931 :end 18917 :pre-blank 0 :contents-begin 15942 :contents-end 18917 :level 3 :priority nil :tags nil :todo-keyword nil :todo-type nil :post-blank 0 :footnote-section-p nil :archivedp nil :commentedp nil :post-affiliated 15931 :title (Tables) :parent (headline (:raw-value Bobby Watson : un fameux concierge :begin 15435 :end 18918 :pre-blank 0 :contents-begin 15500 :contents-end 18917 :level 2 :priority nil :tags nil :todo-keyword nil :todo-type nil :post-blank 1 :footnote-section-p nil :archivedp nil :commentedp nil :post-affiliated 15435 :title (Bobby Watson : un fameux concierge) :parent (headline (:raw-value Personnages tests :begin 15357 :end 22075 :pre-blank 0 :contents-begin 15435 :contents-end 22074 :level 1 :priority nil :tags (personnage) :todo-keyword nil :todo-type nil :post-blank 1 :footnote-section-p nil :archivedp nil :commentedp nil :post-affiliated 15357 :title (Personnages tests) :parent (org-data nil (headline (:raw-value Pistes d'amélioration :begin 131 :end 938 :pre-blank 0 :contents-begin 160 :contents-end 937 :level 1 :priority nil :tags nil :todo-keyword TODO :todo-type todo :post-blank 1 :footnote-section-p nil :archivedp nil :commentedp nil :post-affiliated 131 :title (Pistes d'amélioration) :parent #5) (headline (:raw-value Manipulation des personnages :begin 160 :end 279 :pre-blank 1 :contents-begin 193 :contents-end 278 :level 2 :priority nil :tags nil :todo-keyword nil :todo-type nil :post-blank 1 :footnote-section-p nil :archivedp nil :commentedp nil :post-affiliated 160 :title (Manipulation des personnages) :parent #6) (section (:begin 193 :end 279 :contents-begin 193 :contents-end 278 :post-blank 1 :post-affiliated 193 :parent #7) (plain-list (:type unordered :begin 193 :end 278 :contents-begin 193 :contents-end 278 :structure ((193 0 -  nil [ ] nil 278)) :post-blank 0 :post-affiliated 193 :parent #8) (item (:bullet -  :begin 193 :end 278 :contents-begin 199 :contents-end 278 :checkbox off :counter nil :structure ((193 0 -  nil [ ] nil 278)) :pre-blank 0 :post-blank 0 :post-affiliated 193 :tag nil :parent #9) (paragraph (:begin 199 :end 278 :contents-begin 199 :contents-end 278 :post-blank 0 :post-affiliated 199 :parent #10) (code (:value cthulhu-select-set-carac :begin 199 :end 226 :post-blank 1 :parent #11)) devrait indiquer dans le minibuffer ce qu'il a fait |
+: get-tables
 
 # #+begin_src emacs-lisp
 # ;; Récupérer les tables du personnage sélectionné dans la liste. Oh tiens : =)
@@ -212,9 +219,12 @@ Implémenter un système pour demander quels rolls faire (les rolls c'est ça qu
 : get-character-info
 
 #+begin_src emacs-lisp :tangle org-cthulhu.el
-(defun get-carac (personnage carac)
-  (let* ((personnage-info  (get-character-info personnage)))
-    (assoc carac personnage-info)))
+(defun get-carac (personnage carac-name)
+  (let* ((personnage-info  (get-character-info personnage))
+	 (carac (assoc carac-name personnage-info)))
+    (if (not carac)
+        nil
+     (cons (substring-no-properties (car carac)) (substring-no-properties (cdr carac))))))
 
 (defun carac-value (carac)
   (string-to-number (cdr carac)))
@@ -396,7 +406,7 @@ Page 35 manuel du gardien.
 #+end_src
 
 #+RESULTS:
-: 43 [90, 45, 18] : Réussite majeure
+: 32 [35, 17, 7] : Réussite normale
 
 ** Tests opposés
 
@@ -429,7 +439,7 @@ Page 35 manuel du gardien.
 #+end_src
 
 #+RESULTS:
-: Succès de Bobby Watson : un fameux concierge (Réussite extrême vs Échec)
+: Succès de Bobby Watson : un fameux concierge (Réussite majeure vs Échec)
 
 ** Armes
 *** Représentation des armes 
@@ -469,7 +479,7 @@ sinon. "
 #+end_src
 
 #+RESULTS:
-: IMI Desert Eagle (3D10+2D6+3+Imp/2) [E]
+: select-weapon
 
 *** Roll weapon
 
@@ -529,8 +539,7 @@ sinon. "
 #+end_src
 
 #+RESULTS:
-: 47
-
+: weapon-get-impalement-damage
 
 * Gestion des personnages
 ** Initialiser les caractéristiques dérivées
@@ -590,13 +599,16 @@ sinon. "
   - empalement
 - ~cthulhu-fight-next-round~
     
+
+** Variables utiles
+
 #+begin_src emacs-lisp
 (defvar combat-mode-rows
-  '("Points de vie"
-    "Protection"
-    "Attaques"
-    "Coups rendus"
-    "Blessure grave"
+  '("Points de vie" 
+    "Protection"  
+    "Attaques" 
+    "Coups rendus" 
+    "Blessure grave" 
     "Mourant"
     "Inconscient"
     "Folie"))         
@@ -619,6 +631,54 @@ sinon. "
                do (org-table-goto-column i)
                collect (string-trim (substring-no-properties (org-table-get-field)))))))
 #+end_src
+
+#+RESULTS:
+: cthulhu-fight-get-current-fighters
+
+** Nouveau tableau de combat
+
+#+begin_src emacs-lisp
+(defun build-column (rows personnage-name)
+  (cons personnage-name
+        (loop for row-name in rows
+              collect (let ((carac (get-carac (select-character personnage-name) row-name)))
+                        (if (not carac)
+                            ""
+                          (number-to-string (carac-value carac)))))))
+
+(defun cthulhu-fight-new-fight (fighters-list)
+  "Créer un tableau afin de suivre le combat entre les participants
+présents dans fighters-list."
+  (let* ((fighters-listo (--sort (> (get-carac-value it "DEX") (get-carac-value other "DEX")) fighters-list))
+         (fighters-name (--map (get-name it) fighters-listo)))
+    (cons (cons "Personnages" combat-mode-rows)
+          (loop for fname in fighters-name
+                collect (build-column combat-mode-rows fname)))))
+
+(defun cthulhu-fight-new-fight-select-insert (num)
+  "Sélectionne num participants et créé le tableau correspondant "
+  (save-excursion 
+    (insert (org-ml-to-trimmed-string (apply #'org-ml-build-table!
+                                             (cthulhu-fight-new-fight (loop for i from 1 to num
+                                                                            collect (select-character nil (format " %s/%s " i num))))))))
+  (org-table-transpose-table-at-point)
+  (org-table-insert-hline)
+  (org-table-insert-hline t))
+
+#+end_src
+
+#+RESULTS:
+: cthulhu-fight-new-fight-select-insert
+
+#+begin_src emacs-lisp
+(append '((1 2)) '((3 4) (5 6))))
+#+end_src
+
+#+RESULTS:
+| 1 | 2 |
+| 3 | 4 |
+| 5 | 6 |
+
 
 
 ** Modification des états de combat
