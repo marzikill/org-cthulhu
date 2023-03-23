@@ -47,6 +47,10 @@ Implémenter un système pour demander quels rolls faire (les rolls c'est ça qu
 
 - [ ] Détecter les personnages (tag "personnage") dans un entête de niveau >= 2
 - [X] améliorer les requêtes à ~get-carac~ : c'est long parce qu'on parse tout le buffer à chaque fois, de multiples fois.
+- [-] créer un minor mode...
+  - [X] continuer le renommage
+  - [ ] mettre tout l'import des tables dans une seule fonction
+    
   
 ** Latex
 
@@ -54,6 +58,40 @@ Implémenter un système pour demander quels rolls faire (les rolls c'est ça qu
   un récapitulatif de certaines règles ?
   - combat
   - dé malus/bonus, tests de santé mentale etc
+
+
+
+* Minor mode
+
+#+begin_src emacs-lisp
+(define-minor-mode org-cthulhu-mode
+  "Starts off a minor mode for handling Call of Cthulhu
+scenarios. "
+  :init-value nil
+  :lighter " Org-cthulhu"
+  :after-hook (if org-fragtog-mode
+                  (add-hook 'after-save-hook 'cthulhu-personnages-liste-update nil t)
+                (remove-hook 'after-save-hook 'cthulhu-personnages-liste-update t)))
+
+(defvar-local cthulhu-personnages-liste nil)
+#+end_src
+
+#+RESULTS:
+: cthulhu-personnages-liste
+
+#+begin_src emacs-lisp
+(defconst cthulhu-sections
+  '("Objets"
+   "Personnages"
+   "Monstres"
+   "Lieux"
+   "Événements"
+   "Documentation"))
+#+end_src
+
+#+RESULTS:
+: cthulhu-sections
+
 
 * Import des personnages 
 
@@ -68,33 +106,39 @@ Implémenter un système pour demander quels rolls faire (les rolls c'est ça qu
 : get-tagged-subtree
 
 #+begin_src emacs-lisp :tangle org-cthulhu.el
-(defun get-characters-name ()
-  (--map (org-ml-get-property :raw-value it) cthulhu-personnages-liste))
-
 (defun get-name (personnage)
   (org-ml-get-property :raw-value personnage))
+
+(defun get-characters-name ()
+  (--map (get-name it) cthulhu-personnages-liste))
 #+end_src
 
 #+RESULTS:
-: get-name
+: get-characters-name
 
 #+begin_src emacs-lisp
 ;; (get-characters-name)
-;; (get-name (select-character))
+;; (get-name (cthulhu-select-character))
 #+end_src
 
+#+RESULTS:
+
+#+begin_src emacs-lisp
+(defun cthulhu-personnages-liste-update ()
+    (setq cthulhu-personnages-liste (--filter (eq (org-ml-get-type it) 'headline)
+                                              (get-tagged-subtree '("personnage")))))
+
+
+;; https://github.com/10sr/switch-buffer-functions-el/pull/7
+;;(add-to-list window-buffer-change-functions 'cthulhu-personnages-liste-update)
+#+end_src
+
+#+RESULTS:
+: cthulhu-personnages-liste-update
 
 * Ajout de sous-sections
 
 #+begin_src emacs-lisp
-(defvar default-sections
-  '("Objets"
-   "Personnages"
-   "Monstres"
-   "Lieux"
-   "Événements"
-   "Documentation"))
-
 (defun get-document-sections ()
   (--map (org-ml-get-property :raw-value it) (org-ml-parse-subtrees 'all)))
 
@@ -123,13 +167,13 @@ Implémenter un système pour demander quels rolls faire (les rolls c'est ça qu
 	 (id (add-new-subsection type thing desc)))
     (org-insert-link nil (concat "id:" id) thing)))
 
-(defun make-adders (default-sections)
+(defun make-adders (cthulhu-sections)
   (--map (let* ((type it)
                 (fun-name (concat "cthulhu-new-" type "-and-make-link")))
            (defalias (intern fun-name) `(lambda () (interactive) (cthulhu-new-thing-and-make-link ,type))))
-         default-sections))
+         cthulhu-sections))
 
-(make-adders default-sections)
+(make-adders cthulhu-sections)
 #+end_src
 
 #+RESULTS:
@@ -138,50 +182,25 @@ Implémenter un système pour demander quels rolls faire (les rolls c'est ça qu
 * Manipulation d'un personnage
 ** Récupérer la section de ses tables 
 
-#+begin_src emacs-lisp
-(defvar cthulhu-personnages-liste
-  nil)
-
-(defun cthulhu-personnages-liste-update ()
-  (setq cthulhu-personnages-liste (--filter (eq (org-ml-get-type it) 'headline)
-            (get-tagged-subtree '("personnage")))))
-
-(add-hook 'after-save-hook 'cthulhu-personnages-liste-update)
-
-;; https://github.com/10sr/switch-buffer-functions-el/pull/7
-;;(add-to-list window-buffer-change-functions 'cthulhu-personnages-liste-update)
-#+end_src
 
 #+RESULTS:
 | cthulhu-personnages-liste-update | efs/org-babel-tangle-config | rmail-after-save-hook | latex-auto-save | doom-modeline-update-vcs-text | doom-modeline-update-vcs-icon | doom-modeline-update-buffer-file-name |
 
 #+begin_src emacs-lisp :tangle org-cthulhu.el 
-(defun select-character (&optional personnage-selectionné prompt-info)
-  "Renvoie _un_ personnage du buffer courant"
-  (let* ((personnage-selectionné (if (not personnage-selectionné)
-                                     (completing-read (concat "Sélectionner un personnage: " prompt-info) (get-characters-name) nil t)
-                                   personnage-selectionné)))
-    (car (--filter (string= (org-ml-get-property :raw-value it) personnage-selectionné) cthulhu-personnages-liste))))
+(defun cthulhu-select-character (&optional personnage-name prompt-info)
+  "Renvoie un personnage du buffer courant"
+  (let ((personnage-name (if (not personnage-name)
+                             (completing-read (concat "Sélectionner un personnage: " prompt-info) (get-characters-name) nil t)
+                           personnage-name)))
+    (car (--filter (string= (get-name it) personnage-name) cthulhu-personnages-liste))))
 
-;; On peut probablement utiliser org-ml-match...
-(defun get-tables (personnage)
+(defun cthulhu-get-tables (personnage)
   "Récupère la section des tables d'un personnage donné"
   (car (--filter (string= (org-ml-get-property :raw-value it) "Tables") (org-ml-get-children personnage))))
-
-;; (get-tables (select-character))
 #+end_src
 
 #+RESULTS:
-: get-tables
-
-# #+begin_src emacs-lisp
-# ;; Récupérer les tables du personnage sélectionné dans la liste. Oh tiens : =)
-# (org-ml-get-property :begin (car (get-tables (select-character personnages-subtrees))))
-# (org-ml-get-property :end (car (get-tables (select-character personnages-subtrees))))
-# #+end_src
-
-# #+RESULTS:
-# : 14299
+: cthulhu-get-tables
 
 ** Récupérer ses caractéristiques à partir d'une table 
 *** Utilitaires sur les tables 
@@ -201,7 +220,6 @@ Implémenter un système pour demander quels rolls faire (les rolls c'est ça qu
   "Les valeurs sont les valeurs en seconde colonne de la table"
   (-map #'car (get-table-column table 1)))
   ;; (-map #'org-ml-get-children (get-table-column table 1)))
-
 #+end_src
 
 #+RESULTS:
@@ -222,8 +240,9 @@ Implémenter un système pour demander quels rolls faire (les rolls c'est ça qu
 
 (defun get-character-info (personnage)
   (let* ((carac-name (get-character-caracteristics-names personnage))
-	(carac-value (get-character-caracteristics-values personnage)))
-   (-zip-with 'cons carac-name carac-value)))
+         (carac-value (get-character-caracteristics-values personnage))
+         (normalize-str (lambda (str) (if str (substring-no-properties str) ""))))
+   (--zip-with (cons (normalize-str it) (normalize-str other)) carac-name carac-value)))
 #+end_src
 
 #+RESULTS:
@@ -231,45 +250,40 @@ Implémenter un système pour demander quels rolls faire (les rolls c'est ça qu
 
 #+begin_src emacs-lisp :tangle org-cthulhu.el
 (defun get-carac (personnage carac-name)
-  (let* ((personnage-info  (get-character-info personnage))
-	 (carac (assoc carac-name personnage-info)))
-    (if (not carac)
-        nil
-     (cons (substring-no-properties (car carac)) (substring-no-properties (cdr carac))))))
-
-(defun carac-value (carac)
-  (string-to-number (cdr carac)))
+  "carac : carac-name [str] . carac-value [str]"
+  (assoc carac-name (get-character-info personnage)))
 
 (defun carac-to-string (carac)
   (let ((carac-name (car carac))
-	(carac-value (string-to-number (cdr carac))))
-  (substring-no-properties (format "%s : %s [maj. %s/ext. %s]" carac-name carac-value (majeur carac-value) (extreme carac-value)))))
+        (carac-value (carac-value carac)))
+    (substring-no-properties (format "%s : %s [maj. %s/ext. %s]" carac-name carac-value (majeur carac-value) (extreme carac-value)))))
 
-(defun get-carac-value (personnage carac)
-  (let* ((personnage-info  (get-character-info personnage))
-         (value (cdr (assoc carac personnage-info))))
-    (if (string= carac "-- Impact")
-        (roll-from-string value)
-    (string-to-number value))))
+(defun carac-value (carac)
+  "A number representing the caracteristic value
+Impact : roll the dice "
+  (cond
+   ((string-match-p "Impact" (car carac)) (roll-from-string (cdr carac)))
+   (t (string-to-number (cdr carac)))))
+
+(defun get-carac-value (personnage carac-name)
+  (carac-value (get-carac personnage carac-name)))
 
 (defun select-get-carac (personnage)
   (get-carac-value personnage
                    (completing-read "Sélectionner une  caractéristique: " (get-character-info personnage) nil t)))
 
-;; (select-get-carac (select-character personnages-subtrees))
-;; (get-carac-value (select-character personnages-subtrees) "POU")
+;; (select-get-carac (cthulhu-select-character personnages-subtrees))
+;; (get-carac-value (cthulhu-select-character personnages-subtrees) "POU")
 #+end_src
 
 #+RESULTS:
 : select-get-carac
 
-
-
 ** Modifier une caractéristique 
 
 #+begin_src emacs-lisp
-(defun set-carac (personnage carac calc-new-carac)
-  (let* ((tables (get-tables personnage))
+(defun cthulhu-set-carac (personnage carac calc-new-carac)
+  (let* ((tables (cthulhu-get-tables personnage))
          (beg (org-ml-get-property :begin tables))
          (end (org-ml-get-property :end tables))
          (val (get-carac-value personnage carac))
@@ -281,25 +295,37 @@ Implémenter un système pour demander quels rolls faire (les rolls c'est ça qu
       (goto-char beg)
       (re-search-forward (s-lex-format "^.*${carac}.*$"))
       (replace-match new-line)
-      (org-table-align))
-  (number-to-string val)))
-;; (replace-regexp-in-region (s-lex-format "^.*${carac}.*$") new-line beg end)))
+      (org-table-align)
+      (save-buffer))
+    v))
 
-(defun augmente-carac (old-carac)
-  (+ old-carac 20))
-
-(defun cthulhu-select-set-carac ()
-  (interactive)
-  (let* ((personnage (select-character))
+(defun cthulhu-select-set-carac (new-value)
+  (interactive "PValeur de la caractéristique ? ")
+  (let* ((personnage (cthulhu-select-character))
          (carac (completing-read "Sélectionner une  caractéristique: " (get-character-info personnage) nil t))
-         (new-value (string-to-number (read-from-minibuffer "Valeur de la caractéristique ? ")))
-         (calc-new-carac (lambda (old-carac) new-value))
-         (old-value (set-carac personnage carac calc-new-carac)))
+         (old-value (get-carac-value personnage carac))
+         (mod (if (not mod)
+                  (string-to-number (read-from-minibuffer "Valeur de la caractéristique : "))
+                mod))
+         (calc-new-carac (lambda (val) new-value)))
+    (cthulhu-set-carac personnage carac calc-new-carac)
+    (message (format "%s : %s -> %s" carac old-value new-value))))
+
+(defun cthulhu-select-mod-carac (mod)
+  (interactive "PModification à apporter ? ")
+  (let* ((personnage (cthulhu-select-character))
+         (carac (completing-read "Sélectionner une  caractéristique: " (get-character-info personnage) nil t))
+         (mod (if (not mod)
+                  (string-to-number (read-from-minibuffer "Modification à apporter : "))
+                mod))
+         (old-value (get-carac-value personnage carac))
+         (calc-new-carac (lambda (val) (+ val mod)))
+         (new-value (cthulhu-set-carac personnage carac calc-new-carac)))
     (message (format "%s : %s -> %s" carac old-value new-value))))
 #+end_src
 
 #+RESULTS:
-: cthulhu-select-set-carac
+: cthulhu-select-mod-carac
 
 * Système de jeu
 ** Caractéristiques dérivées
@@ -409,7 +435,7 @@ Page 35 manuel du gardien.
 #+begin_src emacs-lisp
 (defun select-roll-character-carac (&optional modif)
   (interactive)
-  (let* ((perso (select-character))
+  (let* ((perso (cthulhu-select-character))
          (carac (select-get-carac perso))
          (roll (roll100 modif))
          (out (roll-success roll carac)))
@@ -419,7 +445,7 @@ Page 35 manuel du gardien.
 #+end_src
 
 #+RESULTS:
-: 32 [35, 17, 7] : Réussite normale
+: 50 [0, 0, 0] : Échec
 
 ** Tests opposés
 
@@ -427,11 +453,11 @@ Page 35 manuel du gardien.
 
 (defun cthulhu-test-opposé (&optional success1)
   (interactive "P")
-  (let* ((perso1 (select-character))
+  (let* ((perso1 (cthulhu-select-character))
          (out1 (if success1
                    (ask-success-type)
                  (roll-success (roll100) (select-get-carac perso1))))
-         (perso2 (select-character))
+         (perso2 (cthulhu-select-character))
          (comp2 (select-get-carac perso2))
          (out2 (roll-success (roll100) comp2)))
     (message 
@@ -452,7 +478,7 @@ Page 35 manuel du gardien.
 #+end_src
 
 #+RESULTS:
-: Succès de Bobby Watson : un fameux concierge (Réussite majeure vs Échec)
+: Pas de succès
 
 ** Armes
 *** Représentation des armes 
@@ -577,7 +603,7 @@ sinon. "
       )))
 
 (defun init-tables (personnage)
-  (let* ((tables (get-tables personnage))
+  (let* ((tables (cthulhu-get-tables personnage))
          (beg (org-ml-get-property :begin tables))
          (end (org-ml-get-property :end tables))
          (pdv (/ (+ (get-carac-value personnage "CON") (get-carac-value personnage "TAI")) 10))
@@ -591,7 +617,7 @@ sinon. "
 
 (defun cthulhu-select-init ()
   (interactive)
-  (init-tables (select-character)))
+  (init-tables (cthulhu-select-character)))
 #+end_src
 
 #+RESULTS:
@@ -654,7 +680,7 @@ sinon. "
 (defun build-column (rows personnage-name)
   (cons personnage-name
         (loop for row-name in rows
-              collect (let ((carac (get-carac (select-character personnage-name) row-name)))
+              collect (let ((carac (get-carac (cthulhu-select-character personnage-name) row-name)))
                         (if (not carac)
                             ""
                           (number-to-string (carac-value carac)))))))
@@ -673,7 +699,7 @@ présents dans fighters-list."
   (save-excursion 
     (insert (org-ml-to-trimmed-string (apply #'org-ml-build-table!
                                              (cthulhu-fight-new-fight (loop for i from 1 to num
-                                                                            collect (select-character nil (format " %s/%s " i num))))))))
+                                                                            collect (cthulhu-select-character nil (format " %s/%s " i num))))))))
   (org-table-transpose-table-at-point)
   (org-table-insert-hline)
   (org-table-insert-hline t))
@@ -746,9 +772,9 @@ On peut améliorer les prompts
       (let* ((current-health (string-to-number (org-table-blank-field)))
              (new-health (- current-health degats)))
         (cond
-         ((> degats (get-carac-value (select-character victime-name) "Points de vie"))
+         ((> degats (get-carac-value (cthulhu-select-character victime-name) "Points de vie"))
           (setq new-health -100))
-         ((> degats (/ (get-carac-value (select-character victime-name) "Points de vie") 2))
+         ((> degats (/ (get-carac-value (cthulhu-select-character victime-name) "Points de vie") 2))
           (cthulhu-fight-inflict-major-wound victime-name)))
         (insert (number-to-string new-health)))
       (org-table-align))))
@@ -768,8 +794,8 @@ On peut améliorer les prompts
          (victime-name (completing-read "Choix de la victime ? " (cthulhu-fight-get-current-fighters)))
          (def (completing-read "Choix de la riposte ? " combat-options))
          (carac "Corps à corps")
-         (acarac (get-carac (select-character attaquant-name) carac))
-         (vcarac (get-carac (select-character victime-name) carac))
+         (acarac (get-carac (cthulhu-select-character attaquant-name) carac))
+         (vcarac (get-carac (cthulhu-select-character victime-name) carac))
          ;; (acarac (get-carac-value attaquant "Corps à corps"))
          ;; (vcarac (get-carac-value victime "Corps à corps"))
          )
@@ -802,6 +828,8 @@ On peut améliorer les prompts
 #+RESULTS:
 : fight-back-fun
 
+
+
 * Personnages tests                                              :personnage:
 ** Bobby Watson : un fameux concierge                           
 *** En bref 
@@ -832,7 +860,7 @@ Particularités :
 **** Caractéristiques 
 
 #+TBLNAME: carac
-| FOR | 90 | 25 | 10 |
+| FOR | 84 | 42 | 16 |
 | CON | 60 | 30 | 12 |
 | TAI | 70 | 25 | 10 |
 | DEX | 70 | 35 | 14 |
@@ -840,7 +868,7 @@ Particularités :
 | APP | 50 | 25 | 10 |
 | POU | 55 | 27 | 11 |
 | EDU | 10 |  5 |  2 |
-| AGE | 35 |    |    |
+| AGE | 49 | 24 |  9 |
 #+TBLFM: $3=round($2/2)::$4=round($2/5)
 
 **** Santé physique et psychique
