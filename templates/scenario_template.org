@@ -13,6 +13,13 @@ Il est possible d'intégrer ce mode avec org-roam, en ajoutant des lignes du typ
 #+end_src
 
 * Objets                                                              :objet:
+
+** épée
+:PROPERTIES:
+:ID:       249946e6-2552-4c6e-80c2-21a3bb4f9192
+:END:
+belle
+
 * Personnages (joueurs)                                          :personnage:
 #+LATEX: \begin{twocols}
 ** Le dilettante 
@@ -171,6 +178,11 @@ Depuis peu tout votre énervement a disparu. Vous êtes maintenant très excité
 
 
 
+**** Divers                                                     :noexport:
+
+| Protection   | 1 |
+| Attaques     | 1 |
+| Coups rendus | 0 |
 
 *** Remarques                                                      :ignore:
 
@@ -236,12 +248,13 @@ Depuis peu cependant, votre moral est au beau fixe. Vous avez bien fait d'écout
 
 **** Caractéristiques de combat
 
-| Corps à corps                | 25 | 13 | 5 |
-| -- Carrure                   |  0 |  0 | 0 |
-| Armes à feu (armes de poing) | 20 | 10 | 4 |
-| Armes à feu (fusils)         | 25 | 13 | 5 |
-| Armes à feu (mitraillettes)  | 15 |  8 | 3 |
-| Esquive                      | 25 | 13 | 5 |
+| Corps à corps                |  25 | 13 | 5 |
+| Carrure                      |   0 |    |   |
+| Impact                       | 1D3 |    |   |
+| Armes à feu (armes de poing) |  20 | 10 | 4 |
+| Armes à feu (fusils)         |  25 | 13 | 5 |
+| Armes à feu (mitraillettes)  |  15 |  8 | 3 |
+| Esquive                      |  25 | 13 | 5 |
 #+TBLFM: $3=round($2/2)::$4=round($2/05)
 
 **** Compétences
@@ -724,22 +737,16 @@ tranquille
 :ID:       94854d62-ca6a-4a36-9488-55d4734062cb
 :END:
 
-
-
-|----------------+---------------+-----------------+---------------+--------------------------+---------------------------------------|
-| Personnages    | Le dilettante | L'ancien soldat | L'archéologue | Le professeur de langues | L'Abomination, Adepte du Pharaon Noir |
-|----------------+---------------+-----------------+---------------+--------------------------+---------------------------------------|
-| Points de vie  |     -100      |       12        |      13       |            12            |                  -4                   |
-| Protection     |               |                 |               |                          |                                       |
-| Attaques       |       1       |        2        |       1       |            1             |                   1                   |
-| Coups rendus   |       0       |        3        |       0       |            0             |                   4                   |
-| Blessure grave |       t       |        t        |               |                          |                   t                   |
-| Mourant        |               |                 |               |                          |                                       |
-| Inconscient    |               |                 |               |                          |                                       |
-| Folie          |               |                 |               |                          |                                       |
-|----------------+---------------+-----------------+---------------+--------------------------+---------------------------------------|
-|                |     <c10>     |      <c10>      |     <c10>     |          <c10>           |                 <c10>                 |
-
-
+|----------------+-----------------+---------------+---------------+--------------------------+---------------------------------------|
+| Personnages    | L'ancien soldat | Le dilettante | L'archéologue | Le professeur de langues | L'Abomination, Adepte du Pharaon Noir |
+|----------------+-----------------+---------------+---------------+--------------------------+---------------------------------------|
+| Points de vie  |              13 |            10 |            10 |                        9 |                                    11 |
+| Protection     |                 |             1 |               |                          |                                       |
+| Attaques       |                 |             1 |               |                          |                                       |
+| Coups rendus   |                 |             0 |               |                          |                                       |
+| Blessure grave |                 |               |               |                          |                                       |
+| Mourant        |                 |               |               |                          |                                       |
+| Inconscient    |                 |               |               |                          |                                       |
+| Folie          |                 |               |               |                          |                                       |
 
 * Documentation
