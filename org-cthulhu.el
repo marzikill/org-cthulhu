@@ -69,9 +69,6 @@ scenarios. "
 (defun cthulhu--get-characters-name ()
   (--map (cthulhu--get-name it) cthulhu-personnages-liste))
 
-;; (cthulhu--get-characters-name)
-;; (cthulhu--get-name (cthulhu-select-character))
-
 (defun cthulhu-personnages-liste-update ()
     (setq cthulhu-personnages-liste (--filter (eq (org-ml-get-type it) 'headline)
                                               (cthulhu--get-tagged-subtree '("personnage")))))
@@ -271,8 +268,7 @@ If the caracteristic is a dice to roll, roll it. "
                                   (loop for i below (1+ (abs modif))
                                         collect (random 10))))
          (unités-chiffre (random 10)))
-    (+ unités-chiffre (* dizaines-chiffre 10))))))
-    ;; (format "%d%d" dizaines-chiffre unités-chiffre)))
+    (+ unités-chiffre (* dizaines-chiffre 10)))))
 
 (defun cthulhu-roll (Ds F &optional modif)
   "Renvoie une liste de lancés de dés. "
@@ -305,22 +301,6 @@ If the caracteristic is a dice to roll, roll it. "
          (out (cthulhu-roll-success roll (carac-value carac))))
     (message (format "%s Roll %d : %s" (carac-to-string carac) roll (cthulhu--outcomen-to-string out)))))
 
-;; (defun cthulhu-test-opposé (perso1 perso2 out1 out2)
-;;   (interactive "P")
-;;   (let* ((perso1 (cthulhu-select-character))
-;;          (out1 (if success1
-;;                    (cthulhu--ask-success-type)
-;;                  (cthulhu--cthulhu-roll-success (cthulhu--roll100) (cthulhu-select-carac perso1))))
-;;          (perso2 (cthulhu-select-character))
-;;          (comp2 (cthulhu-select-carac perso2))
-;;          (out2 (cthulhu--cthulhu-roll-success (cthulhu--roll100) comp2)))
-;;     (message 
-;;      (cond
-;;       ((< out1 out2) (format "Succès de %s (%s vs %s)"
-;;                              (cthulhu--get-name perso1) (cthulhu--outcomen-to-string out1) (cthulhu--outcomen-to-string out2)))
-;;       ((< out2 out1) (format "Succès de %s (%s vs %s)"
-;;                              (cthulhu--get-name perso2) (cthulhu--outcomen-to-string out2) (cthulhu--outcomen-to-string out1)))
-;;       (t "Pas de succès"))))))
 
 (defun cthulhu--opposed-roll (perso1 perso2 carac1 carac2 roll1 roll2)
   (let ((out1 (cthulhu-roll-success roll1 (carac-value carac1)))

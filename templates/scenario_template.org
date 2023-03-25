@@ -740,11 +740,11 @@ tranquille
 |----------------+-----------------+---------------+---------------+--------------------------+---------------------------------------|
 | Personnages    | L'ancien soldat | Le dilettante | L'archéologue | Le professeur de langues | L'Abomination, Adepte du Pharaon Noir |
 |----------------+-----------------+---------------+---------------+--------------------------+---------------------------------------|
-| Points de vie  |              13 |            10 |            10 |                        9 |                                    11 |
+| Points de vie  |              13 |            10 |            10 |                        9 |                                     7 |
 | Protection     |                 |             1 |               |                          |                                       |
 | Attaques       |                 |             1 |               |                          |                                       |
-| Coups rendus   |                 |             0 |               |                          |                                       |
-| Blessure grave |                 |               |               |                          |                                       |
+| Coups rendus   |                 |             0 |               |                          |                                     1 |
+| Blessure grave |                 |               |               |                          |                                     t |
 | Mourant        |                 |               |               |                          |                                       |
 | Inconscient    |                 |               |               |                          |                                       |
 | Folie          |                 |               |               |                          |                                       |

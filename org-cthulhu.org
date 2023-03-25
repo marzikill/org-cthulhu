@@ -462,8 +462,7 @@ If the caracteristic is a dice to roll, roll it. "
                                   (loop for i below (1+ (abs modif))
                                         collect (random 10))))
          (unités-chiffre (random 10)))
-    (+ unités-chiffre (* dizaines-chiffre 10))))))
-    ;; (format "%d%d" dizaines-chiffre unités-chiffre)))
+    (+ unités-chiffre (* dizaines-chiffre 10)))))
 
 (defun cthulhu-roll (Ds F &optional modif)
   "Renvoie une liste de lancés de dés. "
