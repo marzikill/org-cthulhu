@@ -69,6 +69,9 @@ scenarios. "
 (defun cthulhu--get-characters-name ()
   (--map (cthulhu--get-name it) cthulhu-personnages-liste))
 
+;; (cthulhu--get-characters-name)
+;; (cthulhu--get-name (cthulhu-select-character))
+
 (defun cthulhu-personnages-liste-update ()
     (setq cthulhu-personnages-liste (--filter (eq (org-ml-get-type it) 'headline)
                                               (cthulhu--get-tagged-subtree '("personnage")))))
@@ -120,7 +123,7 @@ scenarios. "
 
 (defun cthulhu--get-table-column (table n)
   (let ((rows-num (length (org-ml-get-children table))))
-    (loop for i from 0 to (- rows-num 1)
+    (cl-loop for i from 0 to (- rows-num 1)
           collect (org-ml-get-children (org-ml-table-get-cell i n table)))))
 
 (defun cthulhu--get-character-info (personnage)
@@ -265,7 +268,7 @@ If the caracteristic is a dice to roll, roll it. "
       (random 100)
   (let* ((choose-dice-fun (if (< 0 modif) #'min #'max))
          (dizaines-chiffre (apply choose-dice-fun
-                                  (loop for i below (1+ (abs modif))
+                                  (cl-loop for i below (1+ (abs modif))
                                         collect (random 10))))
          (unités-chiffre (random 10)))
     (+ unités-chiffre (* dizaines-chiffre 10)))))
@@ -273,9 +276,9 @@ If the caracteristic is a dice to roll, roll it. "
 (defun cthulhu-roll (Ds F &optional modif)
   "Renvoie une liste de lancés de dés. "
   (if (= F 100)
-      (loop for i below Ds
+      (cl-loop for i below Ds
 	    collect (cthulhu--roll100 modif))
-    (loop for i below Ds
+    (cl-loop for i below Ds
 	  collect (1+ (random F)))))
 
 (defun cthulhu-roll-from-string (str)
@@ -301,6 +304,22 @@ If the caracteristic is a dice to roll, roll it. "
          (out (cthulhu-roll-success roll (carac-value carac))))
     (message (format "%s Roll %d : %s" (carac-to-string carac) roll (cthulhu--outcomen-to-string out)))))
 
+;; (defun cthulhu-test-opposé (perso1 perso2 out1 out2)
+;;   (interactive "P")
+;;   (let* ((perso1 (cthulhu-select-character))
+;;          (out1 (if success1
+;;                    (cthulhu--ask-success-type)
+;;                  (cthulhu--cthulhu-roll-success (cthulhu--roll100) (cthulhu-select-carac perso1))))
+;;          (perso2 (cthulhu-select-character))
+;;          (comp2 (cthulhu-select-carac perso2))
+;;          (out2 (cthulhu--cthulhu-roll-success (cthulhu--roll100) comp2)))
+;;     (message 
+;;      (cond
+;;       ((< out1 out2) (format "Succès de %s (%s vs %s)"
+;;                              (cthulhu--get-name perso1) (cthulhu--outcomen-to-string out1) (cthulhu--outcomen-to-string out2)))
+;;       ((< out2 out1) (format "Succès de %s (%s vs %s)"
+;;                              (cthulhu--get-name perso2) (cthulhu--outcomen-to-string out2) (cthulhu--outcomen-to-string out1)))
+;;       (t "Pas de succès"))))))
 
 (defun cthulhu--opposed-roll (perso1 perso2 carac1 carac2 roll1 roll2)
   (let ((out1 (cthulhu-roll-success roll1 (carac-value carac1)))
@@ -431,7 +450,7 @@ sinon. "
 
 (defun cthulhu--build-column (rows personnage-name)
   (cons personnage-name
-        (loop for row-name in rows
+        (cl-loop for row-name in rows
               collect (let ((carac (get-carac (cthulhu-select-character personnage-name) row-name)))
                         (if (not carac)
                             ""
@@ -443,7 +462,7 @@ présents dans fighters-list."
   (let* ((fighters-listo (--sort (> (get-carac-value it "DEX") (get-carac-value other "DEX")) fighters-list))
          (fighters-name (--map (cthulhu--get-name it) fighters-listo)))
     (cons (cons "Personnages" cthulhu-fight-rows)
-          (loop for fname in fighters-name
+          (cl-loop for fname in fighters-name
                 collect (cthulhu--build-column cthulhu-fight-rows fname)))))
 
 (defun cthulhu-fight-new-fight-select-insert (&optional num)
@@ -457,7 +476,7 @@ Sélectionne [argument préfixe] personnages si présent. "
          (characters-names (cthulhu--get-characters-name))
          (selection (if (= num (length cthulhu-personnages-liste))
                         cthulhu-personnages-liste
-                      (loop for i from 1 to num
+                      (cl-loop for i from 1 to num
                             with sel = nil
                             do
                             (let ((p (completing-read (format "Personnage ? %s/%s " i num) characters-names)))
@@ -474,8 +493,8 @@ Sélectionne [argument préfixe] personnages si présent. "
 (defun cthulhu-fight-inflict-major-wound (victime-name)
   "Ajoute un marqueur de blessure majeure sur la victime-name"
   (let* ((party (cthulhu-fight-get-current-fighters))
-         (col (+ 2 (position victime-name party :test #'string=)))
-         (row (+ 2 (position "Blessure grave" cthulhu-fight-rows :test #'string=))))
+         (col (+ 2 (cl-position victime-name party :test #'string=)))
+         (row (+ 2 (cl-position "Blessure grave" cthulhu-fight-rows :test #'string=))))
     (save-excursion
       (org-table-goto-line row)
       (org-table-goto-column col)
@@ -486,8 +505,8 @@ Sélectionne [argument préfixe] personnages si présent. "
 (defun cthulhu-fight-fight-back-dodge (victime-name)
   "Incrémente le compteur de ripostes au CaC de la victime-name"
   (let* ((party (cthulhu-fight-get-current-fighters))
-         (col (+ 2 (position victime-name party :test #'string=)))
-         (row (+ 2 (position "Coups rendus" cthulhu-fight-rows :test #'string=))))
+         (col (+ 2 (cl-position victime-name party :test #'string=)))
+         (row (+ 2 (cl-position "Coups rendus" cthulhu-fight-rows :test #'string=))))
     (save-excursion
       (org-table-goto-line row)
       (org-table-goto-column col)
@@ -500,8 +519,8 @@ Sélectionne [argument préfixe] personnages si présent. "
   "Met à jour les pdvs et les états de la victime-name en lui infligeant un montant de dégâts"
   (let* ((party (cthulhu-fight-get-current-fighters))
          ;; (victime-name (completing-read "Cible de l'attaque : " party))
-         (col (+ 2 (position victime-name party :test #'string=)))
-         (row (+ 2 (position "Points de vie" cthulhu-fight-rows :test #'string=)))
+         (col (+ 2 (cl-position victime-name party :test #'string=)))
+         (row (+ 2 (cl-position "Points de vie" cthulhu-fight-rows :test #'string=)))
          (degats (eval-minibuffer (concat "Dégâts infligés : " rollstr))))
     (save-excursion
       (org-table-goto-line row)

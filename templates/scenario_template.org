@@ -180,9 +180,18 @@ Depuis peu tout votre énervement a disparu. Vous êtes maintenant très excité
 
 **** Divers                                                     :noexport:
 
-| Protection   | 1 |
-| Attaques     | 1 |
-| Coups rendus | 0 |
+| Points de vie (max) |   |
+| Chance (max)        |   |
+| SAN (max)           |   |
+| Âge                 |   |
+| Protection          | 0 |
+| Attaques            | 1 |
+| Coups rendus        | 0 |
+| Blessure grave      |   |
+| Mourant             |   |
+| Inconscient         |   |
+| Folie               |   |
+
 
 *** Remarques                                                      :ignore:
 
@@ -737,16 +746,6 @@ tranquille
 :ID:       94854d62-ca6a-4a36-9488-55d4734062cb
 :END:
 
-|----------------+-----------------+---------------+---------------+--------------------------+---------------------------------------|
-| Personnages    | L'ancien soldat | Le dilettante | L'archéologue | Le professeur de langues | L'Abomination, Adepte du Pharaon Noir |
-|----------------+-----------------+---------------+---------------+--------------------------+---------------------------------------|
-| Points de vie  |              13 |            10 |            10 |                        9 |                                     7 |
-| Protection     |                 |             1 |               |                          |                                       |
-| Attaques       |                 |             1 |               |                          |                                       |
-| Coups rendus   |                 |             0 |               |                          |                                     1 |
-| Blessure grave |                 |               |               |                          |                                     t |
-| Mourant        |                 |               |               |                          |                                       |
-| Inconscient    |                 |               |               |                          |                                       |
-| Folie          |                 |               |               |                          |                                       |
+
 
 * Documentation
